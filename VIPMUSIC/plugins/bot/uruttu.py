@@ -20,7 +20,8 @@ SPAM_WINDOW_SECONDS = 5
 
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
-SHAYRI = [ " **𝑷𝒆𝒏𝒏𝒆𝒚 𝑵𝒆 𝑷𝒂𝒌𝒌𝒂 𝑷𝒂𝒓𝒐𝒕𝒕𝒂 😋✨ 𝑼𝒏 𝑽𝒆𝒆𝒕𝒖𝒌𝒌𝒖 𝑴𝒂𝒑𝒊𝒍𝒂𝒊 𝒂𝒉 𝑵𝒂𝒂𝒏 𝑽𝒂𝒓𝒂𝒕𝒕𝒂🙈✨** ",
+SHAYRI = [  
+         " **𝑷𝒆𝒏𝒏𝒆𝒚 𝑵𝒆 𝑷𝒂𝒌𝒌𝒂 𝑷𝒂𝒓𝒐𝒕𝒕𝒂 😋✨ 𝑼𝒏 𝑽𝒆𝒆𝒕𝒖𝒌𝒌𝒖 𝑴𝒂𝒑𝒊𝒍𝒂𝒊 𝒂𝒉 𝑵𝒂𝒂𝒏 𝑽𝒂𝒓𝒂𝒕𝒕𝒂🙈✨** ",
 " **𝑵𝒆𝒆 𝑻𝒉𝒂𝒏 𝑬𝒏 𝑲𝒂𝒏𝒂𝒗𝒖 𝑲𝒂𝒏𝒏𝒊 🙈✨ 𝑬𝒏 𝑻𝒉𝒂𝒎𝒃𝒉𝒊𝒌𝒌𝒖 𝑵𝒆 𝑻𝒉𝒂𝒏 𝒅𝒊 𝑨𝒏𝒏𝒊 🤤✨** ",
 " **𝑵𝒆𝒆 𝑲𝒖𝒑𝒕𝒂 𝑵𝒆𝒗𝒆𝒓 𝑳𝒂𝒕𝒆 - 𝒖𝒉 🤭✨ 𝑽𝒂𝒏𝒅𝒉𝒐𝒏𝒆𝒚 𝑻𝒉𝒐𝒓𝒂 𝑮𝒂𝒕𝒆 - 𝒖𝒉 😚✨ 𝑵𝒆𝒆𝒕𝒉𝒂𝒏 𝑬𝒏𝒂𝒌𝒌𝒖 𝑭𝒂𝒕𝒆 - 𝒖𝒉 😋✨ 𝑬𝒏 𝑲𝒐𝒅𝒂 𝑽𝒂𝒛𝒉𝒌𝒂𝒊 𝑶𝒐𝒕𝒕𝒖 💙✨** ",
 " **𝑷𝒂𝒍𝒍𝒖 𝑽𝒆𝒍𝒂𝒌𝒌𝒂 𝑻𝒉𝒆𝒗𝒂 𝑩𝒓𝒖𝒔𝒉 - 𝒖𝒉 😬✨ 𝑵𝒆 𝑻𝒉𝒂𝒏 𝑬𝒏𝒂𝒌𝒌𝒖 𝑪𝒓𝒖𝒔𝒉 - 𝒖𝒉 😘✨ 𝑵𝒂𝒎𝒂𝒌𝒖𝒍𝒍𝒂 𝑬𝒅𝒉𝒖𝒌𝒖 𝑹𝒖𝒔𝒉 - 𝒖𝒉 🥵✨ 𝒀𝒐𝒖 𝒂𝒓𝒆 𝑶𝒏𝒍𝒚 𝑴𝒚 𝑾𝒊𝒔𝒉 - 𝒖𝒉 😇✨** ",
@@ -295,7 +296,9 @@ SHAYRI_COMMAND = ["pickupline", "uruttu", "urutu", "pickup"]
     )
 async def help(client: Client, message: Message):
     await message.reply_text(
-        text = random.choice(SHAYRI),
+             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+             parse_mode="HTML"
+    )
         reply_markup=InlineKeyboardMarkup(
             [
                 [
@@ -315,7 +318,9 @@ async def help(client: Client, message: Message):
     )
 async def help(client: Client, message: Message):
     await message.reply_text(
-        text = random.choice(SHAYRI),
+             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+             parse_mode="HTML"
+    )
         reply_markup=InlineKeyboardMarkup(
             [
                 [
