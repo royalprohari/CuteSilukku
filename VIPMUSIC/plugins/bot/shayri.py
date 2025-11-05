@@ -295,7 +295,9 @@ SHAYRI_COMMAND = ["pickupline", "uruttu", "urutu", "pickup"]
     )
 async def help(client: Client, message: Message):
     await message.reply_text(
-        text = random.choice(SHAYRI),
+             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+             parse_mode="HTML"
+    )
         reply_markup=InlineKeyboardMarkup(
             [
                 [
@@ -315,7 +317,9 @@ async def help(client: Client, message: Message):
     )
 async def help(client: Client, message: Message):
     await message.reply_text(
-        text = random.choice(SHAYRI),
+             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+             parse_mode="HTML"
+    )
         reply_markup=InlineKeyboardMarkup(
             [
                 [
