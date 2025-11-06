@@ -133,7 +133,7 @@ async def help(client: Client, message: Message):
              f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
              parse_mode="HTML"
     )
-        reply_markup=InlineKeyboardMarkup(
+         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
