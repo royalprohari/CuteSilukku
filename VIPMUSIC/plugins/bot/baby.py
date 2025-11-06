@@ -122,7 +122,7 @@ SHAYRI = [ "**𝑵𝒆𝒆 𝑷𝒂𝒕𝒉𝒂 𝑷𝒐𝒅𝒖𝒎 𝑯𝒆�
          ]
 
 # Command
-SHAYRI_COMMAND = ["cute", "cutie"]
+SHAYRI_COMMAND = ["soul", "soulmate"]
 
 @app.on_message(
     filters.command(SHAYRI_COMMAND) & filters.group
