@@ -159,7 +159,7 @@ def make_poster(image_url, name1, name2, title, percentage):
 # --- EMOJI BAR FUNCTION ---
 def emoji_bar(percent):
     full = int(percent / 20)
-    return "❤️" * full + "🩷" * (5 - full)
+    return "✩" * full + "★" * (5 - full)
 
 
 # --- /FLAMES COMMAND ---
