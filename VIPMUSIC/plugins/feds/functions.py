@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timedelta
 from pyrogram import Client, errors
 from pyrogram.types import Message, ChatMember
-from VIPMUSIC import config
+import config
 
 
 # ─────────── GENERAL HELPERS ─────────── #
