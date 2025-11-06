@@ -290,44 +290,47 @@ SHAYRI = [ " **𝑷𝒆𝒏𝒏𝒆𝒚 𝑵𝒆 𝑷𝒂𝒌𝒌𝒂 𝑷𝒂�
 SHAYRI_COMMAND = ["pickupline", "uruttu", "urutu", "pickup"]
 
 @app.on_message(
-    filters.command(SHAYRI_COMMAND)
-    & filters.group
-    )
-async def help(client: Client, message: Message):
+    filters.command(SHAYRI_COMMAND) & filters.group
+)
+async def shayri_group(client: Client, message: Message):
     await message.reply_text(
-             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
-             parse_mode="HTML"
-    )
+        f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+        parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        "💕 𝐍𖽞𖾓𖾟𖽙𖾖ᴋ 🦋", url=f"https://t.me/HeartBeat_Offi"),
+                        "💕 𝐍𖽞𖾓𖾟𖽙𖾖ᴋ 🦋",
+                        url="https://t.me/HeartBeat_Offi"
+                    ),
                     InlineKeyboardButton(
-                        "💕 𝐎𖾟𖽡𖽞𖾖 🦋", url=f"https://t.me/HeartBeat_Fam")
-                    
+                        "💕 𝐎𖾟𖽡𖽞𖾖 🦋",
+                        url="https://t.me/HeartBeat_Fam"
+                    ),
                 ]
             ]
         ),
     )
 
+
 @app.on_message(
-    filters.command(SHAYRI_COMMAND)
-    & filters.private
-    )
-async def help(client: Client, message: Message):
+    filters.command(SHAYRI_COMMAND) & filters.private
+)
+async def shayri_private(client: Client, message: Message):
     await message.reply_text(
-             f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
-             parse_mode="HTML"
-    )
+        f"<blockquote>{random.choice(SHAYRI)}</blockquote>",
+        parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                         "💕 𝐍𖽞𖾓𖾟𖽙𖾖ᴋ 🦋", url=f"https://t.me/HeartBeat_Offi"),
+                        "💕 𝐍𖽞𖾓𖾟𖽙𖾖ᴋ 🦋",
+                        url="https://t.me/HeartBeat_Offi"
+                    ),
                     InlineKeyboardButton(
-                        "💕 𝐎𖾟𖽡𖽞𖾖 🦋", url=f"https://t.me/HeartBeat_Muzic")
-                    
+                        "💕 𝐎𖾟𖽡𖽞𖾖 🦋",
+                        url="https://t.me/HeartBeat_Muzic"
+                    ),
                 ]
             ]
         ),
