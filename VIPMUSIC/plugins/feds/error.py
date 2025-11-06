@@ -2,7 +2,7 @@ import traceback
 import html
 from pyrogram import Client, errors
 from pyrogram.types import Message
-from VIPMUSIC.plugins.admins.functions import log_exception
+from VIPMUSIC.plugins.admins.feds.functions import log_exception
 from VIPMUSIC import config
 
 
