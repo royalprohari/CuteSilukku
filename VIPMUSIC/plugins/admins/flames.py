@@ -1,6 +1,7 @@
 import random
 import io
 import requests
+from VIPMUSIC import app
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageStat
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
