@@ -32,16 +32,18 @@ from VIPMUSIC.mongo.feds_db import (
 
 # Attempt to import app and BOT_ID from common module names used by forks
 try:
-    from VIPMUSIC import app, BOT_ID  # type: ignore
+    from VIPMUSIC import app  # type: ignore
 except Exception:
     try:
-        from misskaty import app, BOT_ID  # type: ignore
+        from misskaty import app  # type: ignore
     except Exception:
         # Fallback: expect app to be defined elsewhere in your project
         try:
-            from main import app, BOT_ID  # type: ignore
+            from main import app  # type: ignore
         except Exception:
             raise RuntimeError("Could not import `app` and `BOT_ID`. Ensure your bot package exposes them.")
+
+BOT_ID = app.id
 
 from config import LOG_GROUP_ID, OWNER_ID
 from VIPMUSIC.plugins.feds.functions import extract_user, extract_user_and_reason  # adjust path if needed
