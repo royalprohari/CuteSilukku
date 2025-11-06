@@ -1,45 +1,55 @@
+import os
 import traceback
-import html
-from pyrogram import Client, errors
-from pyrogram.types import Message
-from VIPMUSIC.plugins.admins.feds.functions import log_exception
-from VIPMUSIC import config
+from datetime import datetime
+from functools import wraps
+
+from pyrogram.errors.exceptions.forbidden_403 import ChatWriteForbidden
+from pyrogram.types import CallbackQuery
+
+from config import LOG_CHANNEL
 
 
-async def handle_error(client: Client, message: Message, err: Exception):
-    """Handle and report errors gracefully."""
-    if isinstance(err, errors.FloodWait):
-        await message.reply_text(f"⏳ Flood wait of {err.value} seconds.")
-        return
-    if isinstance(err, errors.MessageNotModified):
-        return
-    if isinstance(err, errors.MessageDeleteForbidden):
-        return
-    if isinstance(err, errors.ChatWriteForbidden):
-        return
-    if isinstance(err, errors.UserNotParticipant):
-        await message.reply_text("🚫 The user is not a participant in this chat.")
-        return
+def capture_err(func):
+    @wraps(func)
+    async def capture(client, message, *args, **kwargs):
+        if isinstance(message, CallbackQuery):
+            sender = message.message.reply
+            chat = message.message.chat
+            msg = message.message.text or message.message.caption
+        else:
+            sender = message.reply
+            chat = message.chat
+            msg = message.text or message.caption
+        try:
+            return await func(client, message, *args, **kwargs)
+        except ChatWriteForbidden:
+            return await client.leave_chat(message.chat.id)
+        except Exception as err:
+            exc = traceback.format_exc()
+            error_feedback = "ERROR | {} | {}\n\n{}\n\n{}\n".format(
+                message.from_user.id if message.from_user else 0,
+                chat.id if chat else 0,
+                msg,
+                exc,
+            )
+            day = datetime.now()
+            tgl_now = datetime.now()
 
-    # General fallback
-    try:
-        tb = "".join(traceback.format_exception(None, err, err.__traceback__))
-        text = (
-            "<b>⚠️ Exception Caught</b>\n\n"
-            f"<b>Chat:</b> {message.chat.title if message.chat else 'Private'}\n"
-            f"<b>User:</b> {message.from_user.mention if message.from_user else 'Unknown'}\n"
-            f"<b>Error:</b> <code>{html.escape(str(err))}</code>\n\n"
-            f"<b>Traceback:</b>\n<code>{html.escape(tb[-3000:])}</code>"
-        )
-        await message.reply_text(text)
-        await log_exception(client, message, err)
-    except Exception:
-        pass
+            cap_day = f"{day.strftime('%A')}, {tgl_now.strftime('%d %B %Y %H:%M:%S')}"
+            await sender(
+                "😭 An Internal Error Occurred while processing your Command, the Logs have been sent to the Owners of this Bot. Sorry for Inconvenience..."
+            )
+            with open(
+                f"crash_{tgl_now.strftime('%d %B %Y')}.txt", "w+", encoding="utf-8"
+            ) as log:
+                log.write(error_feedback)
+                log.close()
+            await client.send_document(
+                LOG_CHANNEL,
+                f"crash_{tgl_now.strftime('%d %B %Y')}.txt",
+                caption=f"Crash Report of this Bot\n{cap_day}",
+            )
+            os.remove(f"crash_{tgl_now.strftime('%d %B %Y')}.txt")
+            raise err
 
-
-async def safe_exec(func, client: Client, message: Message, *args, **kwargs):
-    """Run a coroutine and auto-handle exceptions."""
-    try:
-        return await func(client, message, *args, **kwargs)
-    except Exception as err:
-        await handle_error(client, message, err)
+    return capture
