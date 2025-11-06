@@ -116,11 +116,21 @@ def flames_result(name1, name2):
 
 # --- CREATE POSTER ---
 def make_poster(image_url, name1, name2, title, percentage):
-    bg = Image.open(io.BytesIO(requests.get(image_url).content)).convert("RGB")
+    try:
+        # Try to download background image
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        bg = Image.open(io.BytesIO(response.content)).convert("RGB")
+    except Exception as e:
+        print(f"[FLAMES] Image download failed: {e}")
+        # Use solid color fallback background
+        bg = Image.new("RGB", (900, 600), (255, 192, 203))
+
     bg = bg.resize((900, 600)).filter(ImageFilter.GaussianBlur(4))
     stat = ImageStat.Stat(bg)
     brightness = sum(stat.mean[:3]) / 3
     text_color = "black" if brightness > 130 else "white"
+
     draw = ImageDraw.Draw(bg)
     try:
         font_title = ImageFont.truetype("VIPMUSIC/assets/DejaVuSans-Bold.ttf", 60)
@@ -140,8 +150,7 @@ def make_poster(image_url, name1, name2, title, percentage):
     draw_centered_text(530, "✨ Made with ❤️ by Flames Bot", font_small)
 
     bio = io.BytesIO()
-    #bio.name = "ANNIEMUSIC/assets/annie/hb-welcome.jpg"
-    bio.name = "flames_result.jpg"
+    bio.name = "flames_result.jpg"   # safer name
     bg.save(bio, "JPEG")
     bio.seek(0)
     return bio
@@ -155,7 +164,7 @@ def emoji_bar(percent):
 
 # --- /FLAMES COMMAND ---
 @app.on_message(filters.command("flames"))
-async def flames_command(client: Client, message: Message):
+async def flames_command(client, message):
     try:
         args = message.text.split(None, 2)
         if len(args) < 3:
@@ -204,7 +213,7 @@ async def flames_command(client: Client, message: Message):
 
 # --- /MATCH COMMAND ---
 @app.on_message(filters.command("match"))
-async def match_command(client: Client, message: Message):
+async def match_command(client, message):
     try:
         if not message.chat.type in ["supergroup", "group"]:
             await message.reply_text("❌ This command only works in groups!", quote=True)
