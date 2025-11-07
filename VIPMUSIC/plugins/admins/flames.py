@@ -140,34 +140,39 @@ def make_poster(image_url, name1, name2, title_cap, percentage):
     brightness = sum(stat.mean[:3]) / 3
     text_color = "black" if brightness > 130 else "white"
 
-    draw = ImageDraw.Draw(bg)
-    try:
-        font_title = ImageFont.truetype("VIPMUSIC/assets/NotoSansMath-Regular.ttf", 60)
-        font_text = ImageFont.truetype("VIPMUSIC/assets/Rekalgera-Regular.otf", 45)
-        font_small = ImageFont.truetype("VIPMUSIC/assets/Sprintura Demo.otf", 35)
-        font_fancy = ImageFont.truetype("VIPMUSIC/assets/NotoSansMath-Regular.ttf.ttf", 35)
-    except:
-        font_title = font_text = font_small = font_fancy = ImageFont.load_default()
 
-    def draw_centered_text(y, text, font=None):
-        fnt = font if font else ImageFont.load_default()
-        w, h = draw.textsize(text, font=fnt)
-        draw.text(((900 - w) / 2, y), text, fill=text_color, font=fnt)
+draw = ImageDraw.Draw(bg)
+try:
+    font_title = ImageFont.truetype("VIPMUSIC/assets/NotoSansMath-Regular.ttf", 60)
+    font_text = ImageFont.truetype("VIPMUSIC/assets/Rekalgera-Regular.otf", 45)
+    font_small = ImageFont.truetype("VIPMUSIC/assets/Sprintura Demo.otf", 35)
+    font_fancy = ImageFont.truetype("VIPMUSIC/assets/NotoSansMath-Regular.ttf", 35)
+except:
+    font_title = font_text = font_small = font_fancy = ImageFont.load_default()
 
-    def safe_text(text):
-        return text.encode("ascii", "ignore").decode("ascii")
-    
-    draw_centered_text(40, "F L A M E S", font_title)
-    draw_centered_text(170, f"{name1.title()} x {name2.title()}", font_text)
-    draw_centered_text(270, f"Result: {title_cap}", font_text)
-    draw_centered_text(360, f"Compatibility: {percentage}%", font_small)
-    draw_centered_text(530, "Made With x @HeartBeat_Fam", font_fancy)
+def safe_text(text: str):
+    # Remove all non-ASCII characters (like emojis 💔❤️✨ etc.)
+    return text.encode("ascii", "ignore").decode("ascii")
 
-    bio = io.BytesIO()
-    bio.name = "flames_result.jpg"   
-    bg.save(bio, "JPEG")
-    bio.seek(0)
-    return bio
+def draw_centered_text(y, text, font=None):
+    text = safe_text(str(text))  # sanitize before drawing
+    fnt = font if font else ImageFont.load_default()
+    w, h = draw.textsize(text, font=fnt)
+    draw.text(((900 - w) / 2, y), text, fill=text_color, font=fnt)
+
+# --- Drawing text safely ---
+draw_centered_text(40, "F L A M E S", font_title)
+draw_centered_text(170, f"{name1.title()} x {name2.title()}", font_text)
+draw_centered_text(270, f"Result: {title_cap}", font_text)
+draw_centered_text(360, f"Compatibility: {percentage}%", font_small)
+draw_centered_text(530, "Made With x @HeartBeat_Fam", font_fancy)
+
+# --- Save output image ---
+bio = io.BytesIO()
+bio.name = "flames_result.jpg"
+bg.save(bio, "JPEG")
+bio.seek(0)
+return bio
 
 
 # --- EMOJI BAR FUNCTION ---
