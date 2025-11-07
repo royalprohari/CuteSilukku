@@ -141,7 +141,7 @@ def make_poster(image_url, name1, name2, title, percentage):
         font_small = ImageFont.truetype("VIPMUSIC/assets/DejaVuSans.ttf", 35)
         font_fancy = ImageFont.truetype("VIPMUSIC/assets/NotoSansSymbols-Regular.ttf", 35)
     except:
-        font_title = font_text = font_small = ImageFont.load_default()
+        font_title = font_text = font_small = font_fancy = ImageFont.load_default()
 
     def draw_centered_text(y, text, font=None):
         fnt = font if font else ImageFont.load_default()
@@ -151,11 +151,11 @@ def make_poster(image_url, name1, name2, title, percentage):
     def safe_text(text):
         return text.encode("ascii", "ignore").decode("ascii")
     
-    draw_centered_text(40, "𝑭 𖹭 𝑳 𖹭 𝑨 𖹭 𝑴 𖹭 𝑬 𖹭 𝑺") #, font_title)
+    draw_centered_text(40, "𝑭 𖹭 𝑳 𖹭 𝑨 𖹭 𝑴 𖹭 𝑬 𖹭 𝑺", font_title)
     draw_centered_text(170, f"✰ {name1.title()} ❤️ {name2.title()} ✰", font_text)
     draw_centered_text(270, f"✰ Result: {title}", font_text)
     draw_centered_text(360, f"⋆.✰ ̊ Compatibility: {percentage}%", font_small)
-    draw_centered_text(530, "˙⋆✮ мᴀᴅᴇ ᴡɪᴛʜ ❤️ 𝐇в-𝐅ᴀᴍ ✮⋆˙") #, font_small)
+    draw_centered_text(530, "˙⋆✮ мᴀᴅᴇ ᴡɪᴛʜ ❤️ 𝐇в-𝐅ᴀᴍ ✮⋆˙", font_fancy)
 
     bio = io.BytesIO()
     bio.name = "flames_result.jpg"   
