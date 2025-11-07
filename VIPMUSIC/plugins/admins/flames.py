@@ -270,7 +270,7 @@ async def match_command(client, message):
 
 
 # --- HANDLE CALLBACK BUTTONS ---
-@Client.on_callback_query()
+@app.on_callback_query()
 async def callback_handler(client, cq):
     try:
         if cq.data == "flames_retry":
