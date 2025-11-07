@@ -118,7 +118,7 @@ def flames_result(name1, name2):
 
 
 # --- CREATE POSTER ---
-def make_poster(image_url, name1, name2, title, percentage):
+async def make_poster(image_url, name1, name2, title, percentage):
     try:
         # Try to download background image
         response = requests.get(image_url, timeout=10)
