@@ -244,6 +244,60 @@ async def flames_command(client, message):
         await message.reply_text(f"⚠️ Error: {e}")
 
 
+# --- /MATCH COMMAND ---
+@app.on_message(filters.command("match"))
+async def match_command(client, message):
+    try:
+        if message.chat.type not in (ChatType.SUPERGROUP, ChatType.GROUP, "supergroup", "group"):
+            await message.reply_text("❌ This command only works in groups!", quote=True)
+            return
+
+        user = message.from_user
+        members = []
+        async for member in client.get_chat_members(message.chat.id):
+            if not member.user.is_bot and member.user.id != user.id:
+                members.append(member.user)
+            if len(members) >= 50:
+                break
+
+        if len(members) < 3:
+            await message.reply_text("⚠️ Not enough members in this group to match!", quote=True)
+            return
+
+        selected = random.sample(members, 3)
+
+        text = f"<blockquote>🎯 **𝐓ᴏᴘ 3 𝐌ᴀᴛᴄʜᴇs 𝐅ᴏʀ\n[{user.first_name}](tg://user?id={user.id})** 💘</blockquote>\n"
+        for idx, member in enumerate(selected, start=1):
+            name = member.first_name or "Unknown"
+            uid = member.id
+            tag = f"[{name}](tg://user?id={uid})"
+            result_letter = random.choice(list(RESULTS.keys()))
+            result = RESULTS[result_letter]
+            percent = random.randint(50, 100)
+
+            alert = "💞 **Perfect Couple Alert!** 💞" if percent >= 85 and result_letter in ["L", "S", "M"] else ""
+
+            text += (
+                f"<blockquote>{idx}. {tag} → {result['title']} ({percent}%)\n{emoji_bar(percent)}\n"
+                f"📝 {result['desc']}\n{alert}</blockquote>\n"
+            )
+
+        all_images = [img for res in RESULTS.values() for img in res["images"]]
+        image_url = random.choice(all_images)
+
+        await message.reply_photo(
+            photo=image_url,
+            caption=text,
+            #parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔻 ᴛʀʏ ᴀɢᴀɪɴ 🔻", callback_data="match_retry")]
+            ])
+        )
+
+    except Exception as e:
+        await message.reply_text(f"⚠️ Error: {e}")
+
+
 # --- CALLBACKS ---
 @app.on_callback_query()
 async def callback_handler(client, cq):
