@@ -23,14 +23,22 @@ RESULTS = {
         "title": "❤️ 𝐋ᴏᴠᴇ",
         "title_cap": "Love",
         "desc": "There’s a spark and magic between you both — a true love story is forming! 💞",
-        "image_url" : [ "" ],
+        "image_url" : [ 
+            "https://i.imgur.com/4eAOSDq.jpeg",
+            "https://i.imgur.com/4eAOSDq.jpeg",
+            "https://i.imgur.com/4eAOSDq.jpeg"
+        ],
         "images": [f"VIPMUSIC/assets/flames/love/l{random.randint(1,5)}.jpg"]
     },
     "A": {
         "title": "💖 𝐀ғғᴇᴄᴛɪᴏɴ",
         "title_cap": "Affection",
         "desc": "You both care deeply for each other — gentle hearts and pure emotion bloom! 🌸",
-        "image_url" : [ "" ],
+        "image_url" : [ 
+            "https://i.imgur.com/4eAOSDq.jpeg",
+            "https://i.imgur.com/4eAOSDq.jpeg",
+            "https://i.imgur.com/4eAOSDq.jpeg"
+        ],
         "images": [f"VIPMUSIC/assets/flames/affection/a{random.randint(1,5)}.jpg"]
     },
     "M": {
