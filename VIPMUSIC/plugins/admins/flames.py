@@ -146,8 +146,8 @@ def make_poster(image_url, name1, name2, title_cap, percentage):
         # --- Load fonts ---
         try:
             font_title = ImageFont.truetype("VIPMUSIC/assets/Astroz Trial.ttf", 80)
-            font_text = ImageFont.truetype("VIPMUSIC/assets/Sprintura Demo.otf", 45)
-            font_small = ImageFont.truetype("VIPMUSIC/assets/Bilderberg Italic OTF.otf", 70)
+            font_text = ImageFont.truetype("VIPMUSIC/assets/Sprintura Demo.otf", 35)
+            font_small = ImageFont.truetype("VIPMUSIC/assets/Bilderberg Italic OTF.otf", 60)
             font_fancy = ImageFont.truetype("VIPMUSIC/assets/Rostex-Regular.ttf", 15)
         except Exception as e:
             print(f"[FLAMES] Font load failed: {e}")
@@ -171,8 +171,8 @@ def make_poster(image_url, name1, name2, title_cap, percentage):
 
         # --- Draw texts on poster ---
         draw_centered_text(40, "F L A M E S", font_title)
-        draw_centered_text(170, f"{name1.title()} x {name2.title()}\n", font_small)
-        draw_centered_text(300, f"{title_cap}", font_text)
+        draw_centered_text(150, f"{name1.title()} x {name2.title()}\n", font_small)
+        draw_centered_text(310, f"{title_cap}", font_text)
         draw_centered_text(360, f"Compatibility: {percentage}%", font_text)
         draw_centered_text(530, "Made By x @HeartBeat_Fam", font_fancy)
 
