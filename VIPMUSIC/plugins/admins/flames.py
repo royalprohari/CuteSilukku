@@ -176,9 +176,13 @@ async def flames_command(client, message):
 
         caption = (
             f"<blockquote>{result['title']}</blockquote>\n"
-            f"<blockquote>**{name1.title()} x {name2.title()}**\n"
-            f"Compatibility: **{percent}%**\n{emoji_bar(percent)}</blockquote>\n"
-            f"<blockquote>{result['desc']}</blockquote>"
+            f"<blockquote>💥 **{name1.title()} ❣️ {name2.title()}**\n"
+            f"💞 𝐂ᴏᴍᴘᴀᴛɪʙɪʟɪᴛʏ: **{love}%**\n{emoji_bar(love)}\n"
+            f"💓 𝐄ᴍᴏᴛɪᴏɴᴀʟ𝐁ᴏɴᴅ: **{emotion}%**\n{emoji_bar(emotion)}\n"
+            f"🤞🏻 𝐅ᴜɴ𝐋ᴇᴠᴇʟ: **{fun}%**\n{emoji_bar(fun)}\n"
+            f"✨ 𝐂ᴏᴍᴍᴜɴɪᴄᴀᴛɪᴏɴ: **{communication}%**\n{emoji_bar(communication)}\n"
+            f"💯 𝐓ʀᴜsᴛ: **{trust}%**\n{emoji_bar(trust)}</blockquote>\n"
+            f"<blockquote>🔥 {result['desc']}</blockquote>"
         )
 
         buttons = InlineKeyboardMarkup([
