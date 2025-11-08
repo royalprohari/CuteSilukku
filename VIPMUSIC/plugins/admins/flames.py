@@ -77,27 +77,60 @@ def darken_image(image, opacity=0.6):
     return Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
 
 
-# --- FANCY FONT (auto fallback) ---
-def get_font(size):
-    for font_path in [
+# --- FONT LOADERS (Different Fonts for Each Section) ---
+def get_font_flames(size):
+    # Fonts used for the "F L A M E S" header
+    paths = [
+        "VIPMUSIC/assets/fonts/Blanka-Regular.otf",    # example fancy font for F L A M E S
         "VIPMUSIC/assets/Sprintura Demo.otf",
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+def get_font_title(size):
+    # Fonts used for the result title (Love, Friends, etc.)
+    paths = [
+        "VIPMUSIC/assets/fonts/Heavitas.ttf",          # bold elegant font for Title
         "VIPMUSIC/assets/Rekalgera-Regular.otf",
-        "VIPMUSIC/assets/Helvetica-Bold.ttf",
-        
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+def get_font_compat(size):
+    # Fonts used for the Compatibility line
+    paths = [
+        "VIPMUSIC/assets/fonts/Helvetica-Bold.ttf",    # clean readable font for Compatibility
+        "VIPMUSIC/assets/fonts/Montserrat-SemiBold.ttf",
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+def get_font(size):
+    # fallback / general font
+    for f in [
+        "VIPMUSIC/assets/fonts/Rekalgera-Regular.otf",
+        "VIPMUSIC/assets/fonts/Helvetica-Bold.ttf",
     ]:
-        if os.path.exists(font_path):
-            return ImageFont.truetype(font_path, size)
+        if os.path.exists(f):
+            return ImageFont.truetype(f, size)
     return ImageFont.load_default()
 
 
 # --- DRAW RESULT ---
-def draw_result(image, title, desc, percent, name1=None, name2=None):
+def draw_result(image, title_cap, desc, percent, name1=None, name2=None):
     image = darken_image(image, 0.55)
     draw = ImageDraw.Draw(image)
     W, H = image.size
 
-    font_title = get_font(int(W * 0.07))
-    font_sub = get_font(int(W * 0.045))
+    font_flames = get_font_flames(int(W * 0.09))
+    font_title = get_font_title(int(W * 0.07))
+    font_compat = get_font_compat(int(W * 0.045))
     font_name = get_font(int(W * 0.06))
     font_small = get_font(int(W * 0.035))
     font_bottom = get_font(int(W * 0.03))
@@ -107,23 +140,28 @@ def draw_result(image, title, desc, percent, name1=None, name2=None):
             draw.text((x + ox, y + oy), text, font=font, fill="black")
         draw.text((x, y), text, font=font, fill=fill)
 
+    # --- FLAMES HEADER ---
     flames_title = "-- F L A M E S --"
-    shadowed_text((W - draw.textlength(flames_title, font=font_title)) / 2, H * 0.10, flames_title, font_title)
+    shadowed_text((W - draw.textlength(flames_title, font=font_flames)) / 2, H * 0.08, flames_title, font_flames)
 
+    # --- NAMES ---
     if name1 and name2:
         names_text = f"{name1.title()} ❤ {name2.title()}"
-        shadowed_text((W - draw.textlength(names_text, font=font_name)) / 2, H * 0.28, names_text, font_name)
+        shadowed_text((W - draw.textlength(names_text, font=font_name)) / 2, H * 0.25, names_text, font_name)
 
-    result_heading = f"Result: {title_cap}"
-    shadowed_text((W - draw.textlength(result_heading, font=font_sub)) / 2, H * 0.43, result_heading, font_sub)
+    # --- TITLE (Result Type) ---
+    shadowed_text((W - draw.textlength(title_cap, font=font_title)) / 2, H * 0.38, title_cap, font_title)
 
+    # --- COMPATIBILITY ---
     comp_heading = f"Compatibility: {percent}%"
-    shadowed_text((W - draw.textlength(comp_heading, font=font_sub)) / 2, H * 0.56, comp_heading, font_sub)
+    shadowed_text((W - draw.textlength(comp_heading, font=font_compat)) / 2, H * 0.50, comp_heading, font_compat)
 
-    shadowed_text((W - draw.textlength(desc, font=font_small)) / 2, H * 0.68, desc, font_small)
+    # --- DESCRIPTION ---
+    shadowed_text((W - draw.textlength(desc, font=font_small)) / 2, H * 0.64, desc, font_small)
 
-    footer = "Made by ❤ @HeartBeat_Fam"
-    shadowed_text((W - draw.textlength(footer, font=font_bottom)) / 2, H * 0.88, footer, font_bottom)
+    # --- FOOTER ---
+    footer = "Made With ❤ @HeartBeat_Fam"
+    shadowed_text((W - draw.textlength(footer, font=font_bottom)) / 2, H * 0.86, footer, font_bottom)
 
     return image
 
@@ -146,14 +184,17 @@ async def flames_command(client, message):
         result_letter = flames_result(name1, name2)
         result = RESULTS[result_letter]
 
+        # Restore all stat variables used in caption
         love = random.randint(60, 100)
         emotion = random.randint(40, 100)
         fun = random.randint(30, 100)
         communication = random.randint(50, 100)
         trust = random.randint(40, 100)
 
-        bg = await get_random_image(result_letter)
+        # percent used for the image compatibility display
         percent = random.randint(10, 100)
+
+        bg = await get_random_image(result_letter)
         bg = draw_result(bg, result["title_cap"], result["desc"], percent, name1, name2)
         buffer = io.BytesIO()
         bg.save(buffer, "JPEG")
@@ -210,7 +251,7 @@ async def match_command(client, message):
 
         random_result = random.choice(list(RESULTS.keys()))
         bg = await get_random_image(random_result)
-        bg = draw_result(bg, RESULTS[random_result]["title"], RESULTS[random_result]["desc"], random.randint(60, 100))
+        bg = draw_result(bg, RESULTS[random_result]["title_cap"], RESULTS[random_result]["desc"], random.randint(60, 100))
         output = io.BytesIO()
         output.name = "match_result.jpg"
         bg.save(output, "JPEG")
