@@ -3,7 +3,7 @@ import io
 import os
 import aiohttp
 from VIPMUSIC import app
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.enums import ChatType
@@ -16,11 +16,11 @@ RESULTS = {
     "A": {"title": "💖 𝐀ғғᴇᴄᴛɪᴏɴ", "title_cap": "Affection", "desc": "You both care deeply for each other — gentle hearts and pure emotion bloom! 🌸", "folder": "VIPMUSIC/assets/flames/affection", "urls": [""]},
     "M": {"title": "💍 𝐌ᴀʀʀɪᴀɢᴇ", "title_cap": "Marriage", "desc": "Destiny has already written your names together — a wedding bell symphony awaits! 💫", "folder": "VIPMUSIC/assets/flames/marriage", "urls": [""]},
     "E": {"title": "💔 𝐄ɴᴇᴍʏ", "title_cap": "Enemy", "desc": "Clashing energies and fiery tempers — maybe not meant to be this time 😅", "folder": "VIPMUSIC/assets/flames/enemy", "urls": [""]},
-    "S": {"title": "💜 𝐒ɪʙʟɪɴɢ𝘴", "title_cap": "Siblings", "desc": "You both share a sibling-like connection — teasing, caring, and protective 💫", "folder": "VIPMUSIC/assets/flames/siblings", "urls": [""]},
+    "S": {"title": "💜 𝐒ɪʙʟɪɴɢ𝘀", "title_cap": "Siblings", "desc": "You both share a sibling-like connection — teasing, caring, and protective 💫", "folder": "VIPMUSIC/assets/flames/siblings", "urls": [""]},
 }
 
 
-# --- IMAGE PICKER (Local + URL Fallback) ---
+# --- IMAGE PICKER ---
 async def get_random_image(result_letter):
     result = RESULTS[result_letter]
     folder = result["folder"]
@@ -28,31 +28,22 @@ async def get_random_image(result_letter):
 
     local_files = []
     if os.path.isdir(folder):
-        local_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
+        local_files = [os.path.join(folder, f) for f in os.listdir(folder)
+                       if f.lower().endswith((".jpg", ".jpeg", ".png"))]
 
     if not local_files and not urls:
         raise ValueError(f"No images available for {result_letter}")
 
-    use_local = False
-    if local_files and urls:
-        use_local = random.choice([True, False])
-    elif local_files:
-        use_local = True
-
-    if use_local:
-        choice = random.choice(local_files)
-        print(f"[FLAMES] Selected local: {choice}")
-        return Image.open(choice).convert("RGB")
+    # choose between local or URL
+    if local_files and (not urls or random.choice([True, False])):
+        return Image.open(random.choice(local_files)).convert("RGB")
 
     url = random.choice(urls)
-    print(f"[FLAMES] Selected URL: {url}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 if resp.status != 200:
-                    if local_files:
-                        return Image.open(random.choice(local_files)).convert("RGB")
-                    raise Exception(f"Failed to fetch URL ({resp.status})")
+                    raise Exception
                 data = await resp.read()
         return Image.open(io.BytesIO(data)).convert("RGB")
     except Exception:
@@ -80,28 +71,31 @@ def flames_result(name1, name2):
     return flames[0]
 
 
-# --- DARK EFFECT ---
+# --- DARKEN IMAGE ---
 def darken_image(image, opacity=0.6):
     overlay = Image.new("RGBA", image.size, (0, 0, 0, int(255 * opacity)))
-    darkened = Image.alpha_composite(image.convert("RGBA"), overlay)
-    return darkened.convert("RGB")
+    return Image.alpha_composite(image.convert("RGBA"), overlay).convert("RGB")
 
 
-# --- FANCY FONT ---
+# --- FANCY FONT (auto fallback) ---
 def get_font(size):
-    font_path = "VIPMUSIC/assets/Sprintura Demo.otf"
-    if not os.path.exists(font_path):
-        font_path = "VIPMUSIC/assets/Rekalgera-Regular.otf"
-    return ImageFont.truetype(font_path, size)
+    for font_path in [
+        "VIPMUSIC/assets/Sprintura Demo.otf",
+        "VIPMUSIC/assets/Rekalgera-Regular.otf",
+        "VIPMUSIC/assets/Helvetica-Bold.ttf",
+        
+    ]:
+        if os.path.exists(font_path):
+            return ImageFont.truetype(font_path, size)
+    return ImageFont.load_default()
 
 
-# --- DRAW RESULT ON IMAGE ---
+# --- DRAW RESULT ---
 def draw_result(image, title, desc, percent, name1=None, name2=None):
     image = darken_image(image, 0.55)
     draw = ImageDraw.Draw(image)
     W, H = image.size
 
-    # --- Fonts ---
     font_title = get_font(int(W * 0.07))
     font_sub = get_font(int(W * 0.045))
     font_name = get_font(int(W * 0.06))
@@ -109,49 +103,35 @@ def draw_result(image, title, desc, percent, name1=None, name2=None):
     font_bottom = get_font(int(W * 0.03))
 
     def shadowed_text(x, y, text, font, fill="white"):
-        shadow_color = "black"
-        offsets = [(-2, -2), (2, -2), (-2, 2), (2, 2)]
-        for ox, oy in offsets:
-            draw.text((x + ox, y + oy), text, font=font, fill=shadow_color)
+        for ox, oy in [(-2, -2), (2, -2), (-2, 2), (2, 2)]:
+            draw.text((x + ox, y + oy), text, font=font, fill="black")
         draw.text((x, y), text, font=font, fill=fill)
 
-    # --- Headings ---
     flames_title = "-- F L A M E S --"
-    tw = draw.textlength(flames_title, font=font_title)
-    shadowed_text((W - tw) / 2, H * 0.10, flames_title, font_title)
+    shadowed_text((W - draw.textlength(flames_title, font=font_title)) / 2, H * 0.10, flames_title, font_title)
 
-    # --- Names ---
     if name1 and name2:
         names_text = f"{name1.title()} ❤ {name2.title()}"
-        nw = draw.textlength(names_text, font=font_name)
-        shadowed_text((W - nw) / 2, H * 0.28, names_text, font_name)
+        shadowed_text((W - draw.textlength(names_text, font=font_name)) / 2, H * 0.28, names_text, font_name)
 
-    # --- Result heading ---
-    result_heading = f"Result: {title}"
-    rw = draw.textlength(result_heading, font=font_sub)
-    shadowed_text((W - rw) / 2, H * 0.43, result_heading, font_sub)
+    result_heading = f"Result: {title_cap}"
+    shadowed_text((W - draw.textlength(result_heading, font=font_sub)) / 2, H * 0.43, result_heading, font_sub)
 
-    # --- Compatibility heading ---
     comp_heading = f"Compatibility: {percent}%"
-    cw = draw.textlength(comp_heading, font=font_sub)
-    shadowed_text((W - cw) / 2, H * 0.56, comp_heading, font_sub)
+    shadowed_text((W - draw.textlength(comp_heading, font=font_sub)) / 2, H * 0.56, comp_heading, font_sub)
 
-    # --- Description ---
-    dw = draw.textlength(desc, font=font_small)
-    shadowed_text((W - dw) / 2, H * 0.68, desc, font_small)
+    shadowed_text((W - draw.textlength(desc, font=font_small)) / 2, H * 0.68, desc, font_small)
 
-    # --- Footer Signature ---
     footer = "Made by ❤ @HeartBeat_Fam"
-    fw = draw.textlength(footer, font=font_bottom)
-    shadowed_text((W - fw) / 2, H * 0.88, footer, font_bottom)
+    shadowed_text((W - draw.textlength(footer, font=font_bottom)) / 2, H * 0.88, footer, font_bottom)
 
     return image
 
 
 # --- EMOJI BAR ---
 def emoji_bar(percent):
-    full = int(percent / 20)
-    return "✩" * full + "★" * (5 - full)
+    filled = int(percent / 20)
+    return "★" * filled + "✩" * (5 - filled)
 
 
 # --- /FLAMES COMMAND ---
@@ -160,12 +140,12 @@ async def flames_command(client, message):
     try:
         args = message.text.split(None, 2)
         if len(args) < 3:
-            await message.reply_text("✨ Usage: `/flames Name1 Name2`", quote=True)
-            return
+            return await message.reply_text("✨ Usage: `/flames Name1 Name2`", quote=True)
 
         name1, name2 = args[1], args[2]
         result_letter = flames_result(name1, name2)
         result = RESULTS[result_letter]
+
         love = random.randint(60, 100)
         emotion = random.randint(40, 100)
         fun = random.randint(30, 100)
@@ -192,10 +172,7 @@ async def flames_command(client, message):
 
         buttons = InlineKeyboardMarkup([
             [
-               # InlineKeyboardButton("🔻 ᴛʀʏ ᴀɢᴀɪɴ 🔻", callback_data="flames_retry"),
                 InlineKeyboardButton("🔻 sʜᴀʀᴇ 🔻", switch_inline_query="flames love test"),
-            #],
-            #[
                 InlineKeyboardButton("🔻 ᴠɪᴇᴡ ᴀʟʟ 🔻", callback_data="flames_list")
             ]
         ])
@@ -211,15 +188,14 @@ async def flames_command(client, message):
 async def match_command(client, message):
     try:
         if message.chat.type not in (ChatType.SUPERGROUP, ChatType.GROUP):
-            await message.reply_text("❌ This command only works in groups!", quote=True)
-            return
+            return await message.reply_text("❌ This command only works in groups!", quote=True)
 
         user = message.from_user
-        members = [m.user async for m in client.get_chat_members(message.chat.id) if not m.user.is_bot and m.user.id != user.id]
+        members = [m.user async for m in client.get_chat_members(message.chat.id)
+                   if not m.user.is_bot and m.user.id != user.id]
 
         if len(members) < 3:
-            await message.reply_text("⚠️ Not enough members in this group to match!", quote=True)
-            return
+            return await message.reply_text("⚠️ Not enough members in this group!", quote=True)
 
         selected = random.sample(members, 3)
         text = f"<blockquote>🎯 **𝐓ᴏᴘ 3 𝐌ᴀᴛᴄʜᴇs 𝐅ᴏʀ [{user.first_name}](tg://user?id={user.id}) 💘**</blockquote>\n"
@@ -240,7 +216,10 @@ async def match_command(client, message):
         bg.save(output, "JPEG")
         output.seek(0)
 
-        await message.reply_photo(photo=output, caption=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔻 ᴛʀʏ ᴀɢᴀɪɴ 🔻", callback_data="match_retry")]]))
+        await message.reply_photo(photo=output, caption=text,
+                                  reply_markup=InlineKeyboardMarkup(
+                                      [[InlineKeyboardButton("🔻 ᴛʀʏ ᴀɢᴀɪɴ 🔻", callback_data="match_retry")]]))
+
     except Exception as e:
         await message.reply_text(f"⚠️ Error: {e}")
 
