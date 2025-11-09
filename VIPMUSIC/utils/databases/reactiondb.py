@@ -4,7 +4,7 @@ import json
 import os
 from typing import Dict
 
-# JSON file path
+# Path to JSON file for reaction status
 REACTION_FILE = os.path.join(os.path.dirname(__file__), "reaction_status.json")
 
 # Ensure file exists
