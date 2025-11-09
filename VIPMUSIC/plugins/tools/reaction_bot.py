@@ -79,7 +79,7 @@ async def is_admin_or_sudo(client, message: Message) -> Tuple[bool, Optional[str
         return False, str(e)
 
 # -------------------- COMMAND HANDLER --------------------
-@app.on_message(filters.command("reaction") & ~BANNED_USERS & (filters.group | filters.supergroup))
+@app.on_message(filters.command("reaction") & ~BANNED_USERS & filters.chat_type.groups)
 async def toggle_reaction_command(client, message: Message):
     chat_id = message.chat.id
     args = message.text.split(maxsplit=1)
@@ -118,7 +118,6 @@ async def toggle_reaction_command(client, message: Message):
     else:
         await message.reply_text("Usage: `/reaction on` or `/reaction off`", quote=True)
 
-
 # -------------------- CALLBACK BUTTON HANDLERS --------------------
 @app.on_callback_query(filters.regex(r"^react_(on|off):(\-?\d+)$"))
 async def reaction_button_handler(client, callback_query):
@@ -136,7 +135,6 @@ async def reaction_button_handler(client, callback_query):
     elif action == "off":
         await disable_reaction(chat_id, message, is_callback=True)
         await callback_query.answer("💤 Reaction Bot Disabled")
-
 
 # -------------------- TOGGLE FUNCTIONS --------------------
 async def enable_reaction(chat_id: int, message: Message, is_callback=False):
@@ -167,12 +165,11 @@ async def disable_reaction(chat_id: int, message: Message, is_callback=False):
         print(f"[ReactionBot] Disable DB error: {e}")
         await message.reply_text(f"❌ DB Error: {e}")
 
-
 # -------------------- AUTO REACTION --------------------
 @app.on_message(
     (filters.text | filters.sticker | filters.photo | filters.video | filters.document)
     & ~BANNED_USERS
-    & (filters.group | filters.supergroup)
+    & filters.chat_type.groups
 )
 async def auto_react(client, message: Message):
     if not REACTION_BOT:
