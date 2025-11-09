@@ -4,7 +4,7 @@ import config
 
 SUDOERS = list(map(int, config.SUDOERS))
 
-group_filter = filters.chat_type.groups
+group_filter = filters.group | filters.supergroup
 
 def is_authorized(_, __, message):
     user = message.from_user
