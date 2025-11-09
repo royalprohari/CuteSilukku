@@ -42,11 +42,26 @@ def second_page(_):
 	controll_button = [InlineKeyboardButton(text="💕 𝐁꘍𖽝ᴋ 🦋", callback_data=f"settings_back_helper")]
 	second_page_menu = InlineKeyboardMarkup(
 		[
-			[InlineKeyboardButton(text=_["H_B_7"], callback_data="help_callback hb7"), InlineKeyboardButton(text=_["H_B_19"], callback_data="help_callback hb19"),InlineKeyboardButton(text=_["H_B_14"], callback_data="help_callback hb14")],
-			[InlineKeyboardButton(text=_["H_B_15"], callback_data="help_callback hb15"), InlineKeyboardButton(text=_["H_B_16"], callback_data="help_callback hb16"),InlineKeyboardButton(text=_["H_B_17"], callback_data="help_callback hb17")],
-			[InlineKeyboardButton(text=_["H_B_18"], callback_data="help_callback hb18"), InlineKeyboardButton(text=_["H_B_13"], callback_data="help_callback hb13")],
-            [InlineKeyboardButton(text=_["H_B_20"], callback_data="help_callback hb20"), InlineKeyboardButton(text=_["H_B_22"], callback_data="help_callback hb22")],
-            [InlineKeyboardButton(text=_["H_B_21"], callback_data="help_callback hb21")],
+			[
+				InlineKeyboardButton(text=_["H_B_7"], callback_data="help_callback hb7"),
+				InlineKeyboardButton(text=_["H_B_19"], callback_data="help_callback hb19"),
+				InlineKeyboardButton(text=_["H_B_14"], callback_data="help_callback hb14")],
+			[
+				InlineKeyboardButton(text=_["H_B_15"], callback_data="help_callback hb15"),
+				InlineKeyboardButton(text=_["H_B_16"], callback_data="help_callback hb16"),
+				InlineKeyboardButton(text=_["H_B_17"], callback_data="help_callback hb17")
+			],
+			[
+				InlineKeyboardButton(text=_["H_B_18"], callback_data="help_callback hb18"),
+				InlineKeyboardButton(text=_["H_B_13"], callback_data="help_callback hb13")
+			],
+            [
+				InlineKeyboardButton(text=_["H_B_20"], callback_data="help_callback hb20"),
+				InlineKeyboardButton(text=_["H_B_22"], callback_data="help_callback hb22")
+			],
+            [
+				InlineKeyboardButton(text=_["H_B_21"], callback_data="help_callback hb21")
+			],
 			controll_button,
 		]
 	)
