@@ -43,7 +43,12 @@ RESULTS = {
         "title": "💍 𝐌ᴀʀʀɪᴀɢᴇ",
         "title_cap": "Marriage",
         "desc": "Destiny has already written your names together — a wedding bell symphony awaits! 💫",
-        "image_url": [""],
+        "image_url": [
+            "https://files.catbox.moe/z4x6zw.jpg",
+            "https://files.catbox.moe/nkau4y.jpg",
+            "https://files.catbox.moe/hv79i3.jpg",
+            "https://files.catbox.moe/cbcn50.jpg",
+            ],
         "images": [f"VIPMUSIC/assets/flames/marriage/{i}.jpg" for i in range(1, 6)]
     },
     "E": {
@@ -57,7 +62,12 @@ RESULTS = {
         "title": "💜 𝐒ɪʙʟɪɴɢ𝗌",
         "title_cap": "Siblings",
         "desc": "You both share a sibling-like connection — teasing, caring, and protective 💫",
-        "image_url": [""],
+        "image_url": [
+            "https://files.catbox.moe/uf5fvm.jpg",
+            "https://files.catbox.moe/06cypv.jpg",
+            "https://files.catbox.moe/gy210f.jpg",
+            "https://files.catbox.moe/5ho82n.jpg",
+            ],
         "images": [f"VIPMUSIC/assets/flames/siblings/{i}.jpg" for i in range(1, 6)]
     }
 }
