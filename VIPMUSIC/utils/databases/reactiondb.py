@@ -1,4 +1,4 @@
-# VIPMUSIC/utils/database/reactiondb.py
+# VIPMUSIC/utils/databases/reactiondb.py
 
 import json
 import os
