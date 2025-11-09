@@ -284,7 +284,7 @@ async def reaction_button_handler(client, callback: CallbackQuery):
 
 
 # ---------------- Auto-react core behaviour ----------------
-@app.on_message((filters.text | filters.caption) & filters.group & ~filters.edited)
+@app.on_message((filters.text | filters.caption) & filters.group)
 async def auto_react_messages(client, message: Message):
     try:
         # skip commands
