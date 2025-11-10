@@ -1,7 +1,7 @@
 from VIPMUSIC import app
 from pyrogram import filters
 from pyrogram.enums import ParseMode
-
+print("[userid] me, id")
 
 @app.on_message(filters.command("me"))
 def ids(_, message):
