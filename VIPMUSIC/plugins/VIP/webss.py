@@ -4,6 +4,7 @@ from pyrogram.types import Message
 from VIPMUSIC import app
 from VIPMUSIC.utils.errors import capture_err
 
+print("[webss] webss")
 
 @app.on_message(filters.command("webss", prefixes=["/", "!", "%", ",", "", ".", "@", "#"]))
 @capture_err
