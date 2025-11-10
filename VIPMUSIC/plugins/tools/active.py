@@ -11,6 +11,7 @@ from VIPMUSIC.utils.database import (
     remove_active_video_chat,
 )
 
+print("[active] activevc, activevideo")
 
 async def generate_join_link(chat_id: int):
     invite_link = await app.export_chat_invite_link(chat_id)
