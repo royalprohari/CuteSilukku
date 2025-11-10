@@ -6,6 +6,8 @@ from pyrogram.enums import ChatType, ChatMemberStatus
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import ChatPermissions
 
+print("[tagall] tagall, vctag")
+
 spam_chats = []
 
 EMOJI = [ "🦋🦋🦋🦋🦋",
