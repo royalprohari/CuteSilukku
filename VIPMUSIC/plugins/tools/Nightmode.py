@@ -6,7 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram.types import ChatPermissions
 from VIPMUSIC.mongo.nightmodedb import nightdb,nightmode_on,nightmode_off,get_nightchats 
 
-
+print("[Nightmode] nightmode!")
 
 CLOSE_CHAT = ChatPermissions(
     can_send_messages=False,
