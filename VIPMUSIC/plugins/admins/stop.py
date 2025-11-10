@@ -8,9 +8,10 @@ from VIPMUSIC.utils.decorators import AdminRightsCheck
 from VIPMUSIC.utils.inline import close_markup
 from config import BANNED_USERS
 
+print("[stop] end, cend")
 
 @app.on_message(
-    filters.command(["end", "stop", "cend", "cstop"], prefixes=["end","/", "!", "%", ",", "", ".", "@", "#"]) & filters.group & ~BANNED_USERS
+    filters.command(["end", "cend"], prefixes=["end","/", "!", "%", ",", "", ".", "@", "#"]) & filters.group & ~BANNED_USERS
 )
 @AdminRightsCheck
 async def stop_music(cli, message: Message, _, chat_id):
