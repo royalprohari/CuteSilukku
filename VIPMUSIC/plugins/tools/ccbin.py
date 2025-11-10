@@ -5,6 +5,8 @@ from time import time
 import asyncio
 from VIPMUSIC.utils.extraction import extract_user
 
+print("[ccbin] ccbin")
+
 # Define a dictionary to track the last message timestamp for each user
 user_last_message_time = {}
 user_command_count = {}
