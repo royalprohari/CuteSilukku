@@ -9,6 +9,7 @@ from os import getenv
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from dotenv import load_dotenv
 from pyrogram import filters
+print("[reload] reload, reboot, stop_downloading")
 
 load_dotenv()
 
