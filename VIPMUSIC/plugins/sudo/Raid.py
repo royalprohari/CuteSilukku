@@ -6,7 +6,7 @@ from VIPMUSIC import app
 from VIPMUSIC.misc import SUDOERS
 
 # Define the spam command handler
-@app.on_message(filters.command("raid", prefixes=".") & SUDOERS)
+@app.on_message(filters.command("raid", prefixes="/") & SUDOERS)
 def spam_command(client, message):
     try:
         # Delete the user's command text
