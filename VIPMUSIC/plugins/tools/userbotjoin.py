@@ -20,6 +20,7 @@ from VIPMUSIC.utils.decorators.userbotjoin import UserbotWrapper
 from VIPMUSIC.utils.database import get_assistant, is_active_chat
 links = {}
 
+print("[userbotjoin] userbotjoin, leaveuserbot")
 
 @app.on_message(filters.group & filters.command(["userbotjoin", f"userbotjoin@{app.username}"]) & ~filters.private)
 async def join_group(client, message):
