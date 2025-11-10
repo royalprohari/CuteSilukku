@@ -2,9 +2,9 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from VIPMUSIC import app
-from VIPMUSIC.misc import SUDOERS
+from VIPMUSIC.misc import SUDOERS, OWNER_ID
 from VIPMUSIC.utils.databases.reactiondb import reaction_on, reaction_off, is_reaction_on
-from config import START_REACTIONS, OWNER_ID
+from config import START_REACTIONS
 
 print("[ReactionBot] Plugin loaded!")
 
@@ -19,7 +19,6 @@ async def is_authorized(message: Message) -> bool:
 
 # ------------------ COMMANDS ------------------
 
-# /reactionon - enable reactions
 @app.on_message(filters.command("reactionon", prefixes="/") & filters.group)
 async def reaction_on_cmd(client, message: Message):
     if not await is_authorized(message):
@@ -28,7 +27,6 @@ async def reaction_on_cmd(client, message: Message):
     await reaction_on(message.chat.id)
     await message.reply_text("✅ Reactions have been **enabled** for this chat!")
 
-# /reactionoff - disable reactions
 @app.on_message(filters.command("reactionoff", prefixes="/") & filters.group)
 async def reaction_off_cmd(client, message: Message):
     if not await is_authorized(message):
@@ -37,7 +35,6 @@ async def reaction_off_cmd(client, message: Message):
     await reaction_off(message.chat.id)
     await message.reply_text("❌ Reactions have been **disabled** for this chat!")
 
-# /reaction - show inline enable/disable buttons
 @app.on_message(filters.command("reaction", prefixes="/") & filters.group)
 async def reaction_main_cmd(client, message: Message):
     if not await is_authorized(message):
@@ -79,7 +76,7 @@ async def reaction_disable_cb(client, callback: CallbackQuery):
 
 # ------------------ AUTOMATIC REACTIONS ------------------
 
-@app.on_message(filters.group & ~filters.edited)
+@app.on_message(filters.group)  # Removed ~filters.edited
 async def auto_react(client, message: Message):
     chat_id = message.chat.id
     if not await is_reaction_on(chat_id):
