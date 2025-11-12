@@ -1,4 +1,4 @@
-from typing import Union
+
 from pyrogram import Client, filters
 import requests
 import random
@@ -325,8 +325,8 @@ async def shayri_private(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton(text=_["NET"], url="https://t.me/HeartBeat_Offi"),
-                    InlineKeyboardButton(text=_["CHT"],url="https://t.me/HeartBeat_Fam"),
+                    InlineKeyboardButton(text=["NET"], url="https://t.me/HeartBeat_Offi"),
+                    InlineKeyboardButton(text=["CHT"], url="https://t.me/HeartBeat_Fam"),
                 ]
             ]
         ),
