@@ -71,7 +71,7 @@ def second_page(_):
 
 def third_page(_):
 	controll_button = [InlineKeyboardButton(text="💕 𝐁꘍𖽝ᴋ 🦋", callback_data=f"settings_back_helper")]
-	second_page_menu = InlineKeyboardMarkup(
+	third_page_menu = InlineKeyboardMarkup(
 		[
 			[
 				InlineKeyboardButton(text=_["H_B_23"], callback_data="help_callback hb23"),
