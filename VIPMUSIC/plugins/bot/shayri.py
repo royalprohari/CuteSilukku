@@ -325,14 +325,8 @@ async def shayri_private(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton(
-                        "💕 𝐍𖽞𖾓𖾟𖽙𖾖ᴋ 🦋",
-                        url="https://t.me/HeartBeat_Offi"
-                    ),
-                    InlineKeyboardButton(
-                        "💕 𝐎𖾟𖽡𖽞𖾖 🦋",
-                        url="https://t.me/HeartBeat_Muzic"
-                    ),
+                    InlineKeyboardButton(text=_["NET"], url="https://t.me/HeartBeat_Offi"),
+                    InlineKeyboardButton(text=_["CHT"],url="https://t.me/HeartBeat_Fam"),
                 ]
             ]
         ),
