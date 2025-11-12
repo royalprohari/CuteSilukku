@@ -234,7 +234,7 @@ async def helper_cb(client, CallbackQuery, _):
         )
 
 
-@app.on_callback_query(filters.regex("dilXaditi") & ~BANNED_USERS)
+@app.on_callback_query(filters.regex("GhostPage1") & ~BANNED_USERS)
 @languageCB
 async def first_pagexx(client, CallbackQuery, _):
     menu_next = second_page(_)
@@ -244,5 +244,13 @@ async def first_pagexx(client, CallbackQuery, _):
     except:
         return
 
-
+@app.on_callback_query(filters.regex("GhostPage2") & ~BANNED_USERS)
+@languageCB
+async def second_pagexx(client, CallbackQuery, _):
+    menu_next = third_page(_)
+    try:
+        await CallbackQuery.message.edit_text(_["help_1"], reply_markup=menu_next)
+        return
+    except:
+        return
         
