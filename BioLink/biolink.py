@@ -154,5 +154,5 @@ async def check_bio(client: Client, message):
 
 # =================== RUN BOT ===================
 def biolink():
-    """Start the BioLink bot instance."""
-    app.run()
+    await app.start()
+    print("✅ BioLink Bot started successfully.")
