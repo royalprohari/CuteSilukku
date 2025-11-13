@@ -2,13 +2,13 @@ from pyrogram import Client, enums, filters
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import (
-    MONGO_URI,
+    MONGO_DB_URI,
     DEFAULT_CONFIG,
     DEFAULT_PUNISHMENT,
     DEFAULT_WARNING_LIMIT
 )
 
-mongo_client = AsyncIOMotorClient(MONGO_URI)
+mongo_client = AsyncIOMotorClient(MONGO_DB_URI)
 db = mongo_client['telegram_bot_db']
 warnings_collection = db['warnings']
 punishments_collection = db['punishments']
