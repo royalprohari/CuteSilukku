@@ -73,3 +73,49 @@ async def language_markup(client, CallbackQuery, _):
     await set_lang(CallbackQuery.message.chat.id, langauge)
     keyboard = lanuages_keyboard(_)
     return await CallbackQuery.edit_message_reply_markup(reply_markup=keyboard)
+
+#AutoSet Language on Groups & Subgroup
+from pyrogram.types import ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton
+
+@app.on_chat_member_updated(filters.group)
+async def auto_set_language(client, chat_member_updated: ChatMemberUpdated):
+    # Check if the bot was just added to a group
+    if (
+        chat_member_updated.new_chat_member
+        and chat_member_updated.new_chat_member.user.id == (await client.get_me()).id
+    ):
+        chat = chat_member_updated.chat
+        print(f"[language auto] Bot added to group: {chat.title} ({chat.id})")
+
+        # Default language to show (you can change "en" to any)
+        _ = get_string("en")
+
+        # Create the language selection keyboard
+        keyboard = InlineKeyboard(row_width=2)
+        keyboard.add(
+            *[
+                InlineKeyboardButton(
+                    text=languages_present[i],
+                    callback_data=f"languages:{i}",
+                )
+                for i in languages_present
+            ]
+        )
+        keyboard.row(
+            InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")
+        )
+
+        # Send the automatic "set language" message
+        caption = (
+            "» ᴘʟᴇᴀsᴇ ᴄʜᴏᴏsᴇ ᴛʜᴇ ʟᴀɴɢᴜᴀɢᴇ ᴡʜɪᴄʜ ʏᴏᴜ ᴡᴀɴɴᴀ sᴇᴛ ᴀs "
+            "ᴛʜɪs ɢʀᴏᴜᴘ's ᴅᴇғᴀᴜʟᴛ ʟᴀɴɢᴜᴀɢᴇ :"
+        )
+
+        try:
+            await client.send_message(
+                chat.id,
+                caption,
+                reply_markup=keyboard,
+            )
+        except Exception as e:
+            print(f"[language auto] Failed to send in {chat.id}: {e}")
