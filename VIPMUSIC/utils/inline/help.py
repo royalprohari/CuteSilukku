@@ -6,8 +6,8 @@ from VIPMUSIC import app
 
 def first_page(_):
 	controll_button = [
-		InlineKeyboardButton(text="💕 𝐌𖾔𖽡𖽪 🦋", callback_data=f"settingsback_helper"),
-		InlineKeyboardButton(text="💕 𝐍𖾔𝅃𖾓 🦋", callback_data=f"GhostPage1")
+		InlineKeyboardButton(text=_["MENU_BUTTON"], callback_data=f"settingsback_helper"),
+		InlineKeyboardButton(text=_["NEXT_BUTTON"], callback_data=f"GhostPage1")
 	]
 	first_page_menu = InlineKeyboardMarkup(
 		[
@@ -39,8 +39,8 @@ def first_page(_):
 
 
 def second_page(_):
-	controll_button = [InlineKeyboardButton(text="💕 𝐁꘍𖽝ᴋ 🦋", callback_data=f"settings_back_helper"),
-					   InlineKeyboardButton(text="💕 𝐍𖾔𝅃𖾓 🦋", callback_data=f"GhostPage2")
+	controll_button = [InlineKeyboardButton(text=_["BACK_BUTTON"], callback_data=f"settings_back_helper"),
+					   InlineKeyboardButton(text=_["NEXT_BUTTON"], callback_data=f"GhostPage2")
 					  ]
 	second_page_menu = InlineKeyboardMarkup(
 		[
@@ -72,7 +72,7 @@ def second_page(_):
 
 
 def third_page(_):
-	controll_button = [InlineKeyboardButton(text="💕 𝐁꘍𖽝ᴋ 🦋", callback_data=f"settings_back_helper")]
+	controll_button = [InlineKeyboardButton(text=_["BACK_BUTTON"], callback_data=f"settings_back_helper")]
 	third_page_menu = InlineKeyboardMarkup(
 		[
 			[
@@ -112,27 +112,27 @@ def help_pannel(_, START: Union[bool, int] = None):
     upl = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(text="⌯ 𝐀𖽴𖾕𖽹𖽡 ⌯",callback_data="help_callback hb1"),
-                InlineKeyboardButton(text="⌯ 𝐀𖽪𖾓𖽻 ⌯",callback_data="help_callback hb2"),
-                InlineKeyboardButton(text="💕 𝐁꘍𖽝ᴋ 🦋",callback_data="help_callback hb3"),
+                InlineKeyboardButton(text=_["H_B_1"],callback_data="help_callback hb1"),
+                InlineKeyboardButton(text=_["H_B_2"],callback_data="help_callback hb2"),
+                InlineKeyboardButton(text=_["H_B_3"],callback_data="help_callback hb3"),
             ],
             [
-                InlineKeyboardButton(text="⌯ 𝐆𖽝꘍𖾗𖾓 ⌯",callback_data="help_callback hb4"),
-                InlineKeyboardButton(text="⌯ 𝐆 𖽜꘍𖽡⌯ ",callback_data="help_callback hb12"),
-                InlineKeyboardButton(text="⌯ 𝐋ʏ𖽷𖽹𖽝𖾗 ⌯",callback_data="help_callback hb5"),
+                InlineKeyboardButton(text=_["H_B_4"],callback_data="help_callback hb4"),
+                InlineKeyboardButton(text=_["H_B_5"],callback_data="help_callback hb5"),
+                InlineKeyboardButton(text=_["H_B_6"],callback_data="help_callback hb6"),
             ],
             [
-                InlineKeyboardButton(text="⌯ 𝐏𖾘꘍ʏ𖾘𖽹𖾗𖾓 ⌯",callback_data="help_callback hb6"),
-                InlineKeyboardButton(text="⌯ 𝐕𖽙𖽹𖽝𖽞𝐂𖽻꘍𖾓 ⌯",callback_data="help_callback hb10"),
+                InlineKeyboardButton(text=_["H_B_7"],callback_data="help_callback hb7"),
+                InlineKeyboardButton(text=_["H_B_8"],callback_data="help_callback hb8"),
             ],
             [
            
-                InlineKeyboardButton(text="⌯ 𝐏𖾘꘍ʏ ⌯",callback_data="help_callback hb8"),
-                InlineKeyboardButton(text="⌯ 𝐒𖽪𖽴𖽙 ⌯",callback_data="help_callback hb9"),
+                InlineKeyboardButton(text=_["H_B_9"],callback_data="help_callback hb9"),
+                InlineKeyboardButton(text=_["H_B_10"],callback_data="help_callback hb10"),
             ],
             [
-                InlineKeyboardButton(text="💕 𝐒𖾓꘍𖽷𖾓 🦋",callback_data="help_callback hb11"),
-            ],
+                InlineKeyboardButton(text=_["H_B_11"],callback_data="help_callback hb11"),
+            ]
             mark,
         ]
     )
