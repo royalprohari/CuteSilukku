@@ -39,6 +39,10 @@ URL_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+DEFAULT_WARNING_LIMIT = int(os.environ.get("DEFAULT_WARNING_LIMIT", "3"))
+DEFAULT_PUNISHMENT = os.environ.get("DEFAULT_PUNISHMENT", "mute")  # Options: "mute", "ban"
+DEFAULT_CONFIG = ("warn", DEFAULT_WARNING_LIMIT, DEFAULT_PUNISHMENT)
+
 ## Fill these variables if you're deploying on heroku.
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 # Get it from http://dashboard.heroku.com/account
