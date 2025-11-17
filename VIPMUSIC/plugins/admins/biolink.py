@@ -674,3 +674,17 @@ async def anti_flood_detect(client, message: Message):
                 await message.reply_text(f"I don't have permission to {mode} users.")
         # clear cache for that user to avoid repeated actions
         _spam_cache.pop(uid, None)
+
+# ---- Ensure DB is created when bot is started ----
+async def __biolink_db_init():
+    await init_db()
+
+app.add_handler(
+    app.on_callback_query()(lambda *_: None).handler,  # dummy
+    group=-1
+)
+
+if not hasattr(app, "_biolink_db_initialized"):
+    app._biolink_db_initialized = True
+    asyncio.get_event_loop().create_task(__biolink_db_init())
+    
