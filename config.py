@@ -33,17 +33,6 @@ LOG_CHANNEL = int(getenv("LOG_CHANNEL", "-1001735663878")) #fed_logs
 OWNER_ID = int(getenv("OWNER_ID", 1281282633))
 SUDOERS = getenv("SUDOERS", "1281282633 8399160924 6773435708").split()
 
-# Regex pattern to detect URLs in user bios
-URL_PATTERN = re.compile(
-    r"((https?://|http://|www\.)[^\s]+|t\.me/[^\s]+|telegram\.me/[^\s]+|bit\.ly/[^\s]+|tinyurl\.com/[^\s]+|@[a-zA-Z0-9_]+)",
-    re.IGNORECASE
-)
-
-DEFAULT_WARNING_LIMIT = int(os.environ.get("DEFAULT_WARNING_LIMIT", "3"))
-DEFAULT_PUNISHMENT = os.environ.get("DEFAULT_PUNISHMENT", "mute")  # Options: "mute", "ban"
-DEFAULT_CONFIG = ("warn", DEFAULT_WARNING_LIMIT, DEFAULT_PUNISHMENT)
-BIOLINK_BOT = getenv("BIOLINK_BOT","False")
-
 ## Fill these variables if you're deploying on heroku.
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 # Get it from http://dashboard.heroku.com/account
