@@ -3,20 +3,13 @@ import aiosqlite
 import asyncio
 from typing import List, Tuple
 
-from pyrogram import Client, filters, errors
+from pyrogram import filters, errors
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions, Message
 
-from config import API_ID, API_HASH, BOT_TOKEN, URL_PATTERN
+from VIPMUSIC import app   # <-- USE MAIN BOT CLIENT
+from config import URL_PATTERN
 
 DB_PATH = "biolink_combined.db"
-
-# ------------------ Pyrogram client (bot) ------------------
-app = Client(
-    "BioLinkRobot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN,
-)
 
 # ------------------ Database helpers ------------------
 async def init_db():
@@ -53,7 +46,9 @@ async def init_db():
         await db.commit()
 
 # Ensure DB initializes on import/start
-asyncio.get_event_loop().run_until_complete(init_db())
+@app.on_startup()
+async def startup_db(client, *args):
+    await init_db()
 
 
 # ---------- DB API (same names as original biolinkdb expected) ----------
