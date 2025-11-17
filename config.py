@@ -42,7 +42,7 @@ URL_PATTERN = re.compile(
 DEFAULT_WARNING_LIMIT = int(os.environ.get("DEFAULT_WARNING_LIMIT", "3"))
 DEFAULT_PUNISHMENT = os.environ.get("DEFAULT_PUNISHMENT", "mute")  # Options: "mute", "ban"
 DEFAULT_CONFIG = ("warn", DEFAULT_WARNING_LIMIT, DEFAULT_PUNISHMENT)
-BIO_LINK_ENABLED = getenv("BIO_LINK_ENABLED","False")
+BIOLINK_BOT = getenv("BIOLINK_BOT","False")
 
 ## Fill these variables if you're deploying on heroku.
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
