@@ -1,13 +1,12 @@
 # VIPMUSIC/plugins/admins/biolink.py
 """
-BioLink plugin (integrated with VIPMUSIC main app).
-
-Features:
-- Detects links in user bios and adverts in messages.
-- Configurable per-chat: mode (warn/mute/ban), limit, penalty.
-- Whitelist support for safe users.
-- In-memory simple anti-flood detection.
-- Uses the main `app` from VIPMUSIC; no separate client.
+BioLink plugin for VIPMUSIC
+- Detects links in bios and advertising in messages
+- Per-chat config: mode (warn/mute/ban), limit, penalty
+- Whitelist support
+- Simple anti-flood
+- Integrates with VIPMUSIC main `app`
+- Safe DB initialization via a single low-priority handler (runs once)
 """
 
 import re
@@ -24,11 +23,12 @@ from pyrogram.types import (
     CallbackQuery,
 )
 
-# Use main bot client from VIPMUSIC
+# Use VIPMUSIC main bot client
 from VIPMUSIC import app
-from config import URL_PATTERN  # optional pattern from config
+from config import URL_PATTERN  # optional, can be a compiled regex or string
 
 DB_PATH = "biolink_combined.db"
+DB_READY = False  # set True once DB init completed
 
 # ------------------ Database helpers ------------------
 async def init_db():
@@ -64,27 +64,13 @@ async def init_db():
         )
         await db.commit()
 
-"""
-# schedule DB init (non-blocking) when module is imported
-try:
-    loop = asyncio.get_event_loop()
-    if loop.is_running():
-        # if loop is already running, create_task will schedule it
-        loop.create_task(init_db())
-    else:
-        # loop exists but not running (rare in typical bot startup), schedule safe
-        loop.run_until_complete(init_db())
-except RuntimeError:
-    # Fallback: create a new event loop to init DB (safe during imports)
-    loop = asyncio.new_event_loop()
-    loop.run_until_complete(init_db())
-    loop.close()
 
-"""
 # ---------- DB API ----------
 async def get_config(chat_id: int) -> Tuple[str, int, str]:
     async with aiosqlite.connect(DB_PATH) as db:
-        cur = await db.execute("SELECT mode, limit, penalty FROM config WHERE chat_id = ?", (chat_id,))
+        cur = await db.execute(
+            "SELECT mode, limit, penalty FROM config WHERE chat_id = ?", (chat_id,)
+        )
         row = await cur.fetchone()
         if row:
             return row[0], row[1], row[2]
@@ -161,19 +147,23 @@ AD_PATTERNS = [
     r"\b(?:\.com|\.net|\.org|\.xyz|\.site|\.online|\.shop)\b",
 ]
 
+# Compile URL pattern from config if present
 try:
-    # URL_PATTERN could be a compiled regex or a string in config
     if isinstance(URL_PATTERN, re.Pattern):
         URL_RE = URL_PATTERN
     else:
-        URL_RE = re.compile(URL_PATTERN)
+        URL_RE = re.compile(URL_PATTERN, re.IGNORECASE)
 except Exception:
     URL_RE = re.compile(r"https?://", re.IGNORECASE)
 
-AD_RE = re.compile("(?:" + ")|(?:".join(p.strip('()') for p in AD_PATTERNS) + ")", re.IGNORECASE)
+AD_RE = re.compile("(?:" + ")|(?:".join(p.strip("()") for p in AD_PATTERNS) + ")", re.IGNORECASE)
 
 
 async def is_admin(client, chat_id: int, user_id: int) -> bool:
+    """
+    Robust admin check using get_chat_member.
+    Returns True for 'administrator' and 'creator'.
+    """
     try:
         member = await client.get_chat_member(chat_id, user_id)
         return member.status in ("administrator", "creator")
@@ -196,8 +186,6 @@ def build_main_keyboard(penalty: str):
 
 
 # ------------------ Commands ------------------
-# Ensure these handlers use the main `app` and are assigned groups to avoid conflicts.
-
 @app.on_message(filters.group & filters.command("config"), group=10)
 async def configure(client, message: Message):
     chat_id = message.chat.id
@@ -338,21 +326,18 @@ async def callback_handler(client, callback_query: CallbackQuery):
     if not await is_admin(client, chat_id, user_id):
         return await callback_query.answer("❌ You are not administrator", show_alert=True)
 
-    # Close button
     if data == "close":
         try:
             return await callback_query.message.delete()
         except Exception:
             return await callback_query.answer()
 
-    # back -> show main
     if data == "back":
         mode, limit, penalty = await get_config(chat_id)
         kb = build_main_keyboard(penalty)
         await callback_query.message.edit_text("**Choose penalty for users with links in bio:**", reply_markup=kb)
         return await callback_query.answer()
 
-    # set warn mode (choose limit)
     if data == "warn":
         _, selected_limit, _ = await get_config(chat_id)
         kb = InlineKeyboardMarkup(
@@ -399,25 +384,21 @@ async def callback_handler(client, callback_query: CallbackQuery):
         await callback_query.message.edit_text(f"**Warning limit set to {count}**", reply_markup=kb)
         return await callback_query.answer()
 
-    # unmute / unban
     if data.startswith(("unmute_", "unban_")):
         action, uid = data.split("_")
         target_id = int(uid)
         try:
-            # fetch user chat info for nice name
             user_info = await client.get_chat(target_id)
             name = f"{user_info.first_name}{(' ' + user_info.last_name) if user_info.last_name else ''}"
         except Exception:
             name = str(target_id)
         try:
             if action == "unmute":
-                # restore basic sending permission
                 await client.restrict_chat_member(chat_id, target_id, ChatPermissions(can_send_messages=True))
             else:
                 await client.unban_chat_member(chat_id, target_id)
             await reset_warnings(chat_id, target_id)
             msg = f"**{name} (`{target_id}`) has been {'unmuted' if action == 'unmute' else 'unbanned'}**."
-
             kb = InlineKeyboardMarkup(
                 [
                     [
@@ -431,7 +412,6 @@ async def callback_handler(client, callback_query: CallbackQuery):
             await callback_query.message.edit_text(f"I don't have permission to {action} users.")
         return await callback_query.answer()
 
-    # cancel warning
     if data.startswith("cancel_warn_"):
         target_id = int(data.split("_")[-1])
         await reset_warnings(chat_id, target_id)
@@ -452,7 +432,6 @@ async def callback_handler(client, callback_query: CallbackQuery):
         await callback_query.message.edit_text(f"**✅ {mention} [`{target_id}`] has no more warnings!**", reply_markup=kb)
         return await callback_query.answer()
 
-    # whitelist / unwhitelist via callback
     if data.startswith("whitelist_"):
         target_id = int(data.split("_")[1])
         await add_whitelist(chat_id, target_id)
@@ -494,14 +473,17 @@ async def callback_handler(client, callback_query: CallbackQuery):
         await callback_query.message.edit_text(f"**❌ {mention} [`{target_id}`] has been removed from whitelist.**", reply_markup=kb)
         return await callback_query.answer()
 
-    # fallback
     return await callback_query.answer()
 
 
 # ------------------ Primary bio/link check + anti-ads/anti-bot ------------------
-# group numbers chosen to reduce risk of interference with other plugins
 @app.on_message(filters.group, group=30)
 async def check_bio_and_ads(client, message: Message):
+    # Ensure DB is ready before any DB calls
+    if not DB_READY:
+        # If DB isn't ready yet, skip processing (DB bootstrap handler will run quickly)
+        return
+
     chat_id = message.chat.id
     if not message.from_user:
         return
@@ -523,11 +505,9 @@ async def check_bio_and_ads(client, message: Message):
 
     # Anti-bio link - original functionality
     if URL_RE.search(bio):
-        # Try to delete the message (if permissions allow)
         try:
             await message.delete()
         except errors.MessageDeleteForbidden:
-            # If bot cannot delete messages, politely instruct
             return await message.reply_text("Please remove the link from your bio.", quote=True)
 
         mode, limit, penalty = await get_config(chat_id)
@@ -553,7 +533,6 @@ async def check_bio_and_ads(client, message: Message):
             if count >= limit:
                 try:
                     if penalty == "mute":
-                        # restrict: disallow sending messages
                         await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
                         kb = InlineKeyboardMarkup([[InlineKeyboardButton("Unmute", callback_data=f"unmute_{user_id}")]])
                         await sent.edit_text(f"**{full_name} has been muted for [Link In Bio].**", reply_markup=kb)
@@ -564,7 +543,6 @@ async def check_bio_and_ads(client, message: Message):
                 except errors.ChatAdminRequired:
                     await sent.edit_text(f"**Remove your bio link. I don't have permission to {penalty}.**")
         else:
-            # direct punish modes
             try:
                 if mode == "mute":
                     await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
@@ -581,7 +559,6 @@ async def check_bio_and_ads(client, message: Message):
     # Anti-ads - check message content for ad patterns
     text = (message.text or message.caption or "") or ""
     if AD_RE.search(text):
-        # treat as link/advertisement: delete message and warn
         try:
             await message.delete()
         except errors.MessageDeleteForbidden:
@@ -614,10 +591,6 @@ async def check_bio_and_ads(client, message: Message):
                 await message.reply_text(f"I don't have permission to {mode} users.")
         return
 
-    # Anti-bot / join-protection placeholder (kept minimal)
-    # If you want join-protection on first post, implement a first-message check or track joins in DB.
-    # Currently left intentionally minimal.
-
 
 # ------------------ Extra anti-spam simple handler ------------------
 _spam_cache = {}
@@ -627,6 +600,10 @@ _SPAM_LIMIT = 6
 
 @app.on_message(filters.group, group=40)
 async def anti_flood_detect(client, message: Message):
+    if not DB_READY:
+        # wait for DB to be ready (skip if not)
+        return
+
     try:
         uid = (message.chat.id, message.from_user.id)
     except Exception:
@@ -644,7 +621,6 @@ async def anti_flood_detect(client, message: Message):
         chat_id = message.chat.id
         user_id = message.from_user.id
         if await is_admin(client, chat_id, user_id) or await is_whitelisted(chat_id, user_id):
-            # clear early and return
             _spam_cache.pop(uid, None)
             return
         mode, limit, penalty = await get_config(chat_id)
@@ -672,20 +648,24 @@ async def anti_flood_detect(client, message: Message):
                     await message.reply_text("User banned for flooding.")
             except errors.ChatAdminRequired:
                 await message.reply_text(f"I don't have permission to {mode} users.")
-        # clear cache for that user to avoid repeated actions
         _spam_cache.pop(uid, None)
 
-# ---- Ensure DB tables exist once bot is fully started ----
 
-async def __biolink_db_init():
+# ------------------ DB bootstrap handler (runs once) ------------------
+@app.on_message(filters.all, group=-1000)
+async def _biolink_db_bootstrap(_, __):
+    """
+    Safe bootstrap: run once when the bot starts handling messages.
+    Ensures DB tables exist before handlers try to use them.
+    Runs only once (controlled by DB_READY).
+    """
+    global DB_READY
+    if DB_READY:
+        return
+    DB_READY = True
     try:
         await init_db()
+        print("[BioLink] Database initialized.")
     except Exception as e:
-        print("[BioLink] DB Init Error:", e)
-
-@app.on_message(filters.command("start"), group=-99)
-async def __biolink_hidden_starter(_, __):
-    # run only once, when the bot handles the first message after startup
-    if not getattr(app, "_biolink_db_ready", False):
-        app._biolink_db_ready = True
-        asyncio.create_task(__biolink_db_init())
+        # print error but do not crash the bot
+        print("[BioLink] DB init failed:", e)
