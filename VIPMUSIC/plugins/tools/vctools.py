@@ -32,7 +32,7 @@ async def brah3(client, message: Message, lang):
 
     text = (
         f"<blockquote>**нɛʏ, {message.from_user.mention}**</blockquote>"
-        f"<blockquote>{lang['VC_INVITE']}</blockquote>"
+        f"<blockquote>{lang['VC_INVITE']}</blockquote>\n"
     )
 
     for user in message.video_chat_members_invited.users:
@@ -46,7 +46,7 @@ async def brah3(client, message: Message, lang):
         add_link = f"https://t.me/{app.username}?startgroup=true"
 
         await message.reply(
-            f"<blockquote>𝐁ʏ{text}</blockquote>",
+            f"\n<blockquote>𝐁ʏ. {text}</blockquote>",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton(text=lang["VC_BUTTON"], url=add_link)],
             ])
