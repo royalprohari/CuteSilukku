@@ -11,7 +11,7 @@ from pyrogram.types import (
 from pyrogram.enums import ChatMemberStatus
 
 from VIPMUSIC import app
-from config import BANNED_USERS, START_REACTIONS, REACTION_ENABLED, OWNER_ID
+from config import BANNED_USERS, START_REACTIONS, OWNER_ID
 from VIPMUSIC.utils.database import mongodb, get_sudoers
 
 print("[reaction] addreact, delreact, reactlist, clearreact, react toggle buttons")
@@ -21,7 +21,7 @@ COLLECTION = mongodb["reaction_mentions"]
 SETTINGS = mongodb["reaction_settings"]  # reaction ON/OFF switch storage
 
 # ---------------- STATE ----------------
-#REACTION_ENABLED = True  # default ON #move to config
+REACTION_ENABLED = True  # default ON #move to config
 
 # ---------------- CACHE ----------------
 custom_mentions: Set[str] = set()
