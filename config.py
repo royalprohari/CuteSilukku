@@ -22,6 +22,9 @@ GPT_API = getenv("GPT_API", "sk-proj-h6pk40oVRIxpXwrf3i50T3BlbkFJGVET8wX1yJtdi0z
 PLAYHT_API = getenv("PLAYHT_API", "22e323f342024c0fb4ee430eeb9d0011")
 DATABASE_NAME = getenv("DATABASE_NAME","GhosttBattFed")
 
+#Reaction Bot - TRUE on / FALSE off
+REACTION_ENABLED = getenv("REACTION_ENABLED","True")
+
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
 
 # Chat id of a group for logging bot's activities
