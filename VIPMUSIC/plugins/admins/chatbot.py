@@ -35,12 +35,13 @@ from deep_translator import GoogleTranslator
 # Try to import the running app/client used in HB-Cute / VIPMUSIC.
 # Adjust if your project exposes the client under a different name.
 try:
-    from main import app  # common pattern
+    # HB-Cute / VIPMUSIC often exposes app in VIPMUSIC package
+    from VIPMUSIC import app
 except Exception:
     try:
-        from VIPMUSIC import app
+        # fallback to main.py style
+        from main import app
     except Exception:
-        # Last fallback: expect 'app' to be injected by loader; raise helpful error if missing
         raise RuntimeError("Could not import 'app'. Ensure your bot exposes the pyrogram Client as 'app'.")
 
 # Load MONGO_URL from repo config or environment
@@ -49,12 +50,14 @@ try:
 except Exception:
     MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 
+# Mongo setup
 mongo = MongoClient(MONGO_URL)
-db = mongo.get_database("vipmusic_db")  # database name; change if you prefer another
+db = mongo.get_database("vipmusic_db")
 chatai_coll = db.get_collection("chatai")
 status_coll = db.get_collection("chatbot_status")
 lang_coll = db.get_collection("chat_langs")
 
+# Translator (used when /setlang is set)
 translator = GoogleTranslator()
 
 # runtime caches and rate limiting
@@ -95,7 +98,7 @@ def get_reply_sync(word: str):
 
 
 def is_user_admin(client, chat_id: int, user_id: int) -> bool:
-    """Return True if user is chat admin/owner (works for groups/supergroups)."""
+    """Return True if user is chat admin/owner (works for groups)."""
     try:
         member = client.get_chat_member(chat_id, user_id)
         return member.status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
@@ -123,6 +126,7 @@ async def save_reply(original_message: Message, reply_message: Message):
             reply_data["text"] = reply_message.sticker.file_id
             reply_data["check"] = "sticker"
         elif getattr(reply_message, "photo", None):
+            # photo is an array -> file_id property on PhotoSize is accessible directly as .file_id
             reply_data["text"] = reply_message.photo.file_id
             reply_data["check"] = "photo"
         elif getattr(reply_message, "video", None):
@@ -177,7 +181,8 @@ def chatbot_keyboard(is_enabled: bool):
         )
 
 
-@app.on_message(filters.command("chatbot") & (filters.group | filters.supergroup))
+# show settings (group) — only admins can use
+@app.on_message(filters.command("chatbot") & filters.group)
 async def chatbot_cmd(client, message: Message):
     """Show chatbot status with inline enable/disable. Only admins can toggle via buttons."""
     chat_id = message.chat.id
@@ -200,6 +205,7 @@ async def chatbot_cmd(client, message: Message):
     await message.reply_text(text, reply_markup=chatbot_keyboard(is_enabled))
 
 
+# callbacks for enable/disable
 @app.on_callback_query(filters.regex("^cb_enable$") | filters.regex("^cb_disable$"))
 async def chatbot_toggle_cb(client, cq: CallbackQuery):
     """Handle enable/disable button presses. Confirm caller is admin in group."""
@@ -208,7 +214,7 @@ async def chatbot_toggle_cb(client, cq: CallbackQuery):
         caller_id = cq.from_user.id
 
         # Only allow admins to toggle in groups
-        if cq.message.chat.type in ("group", "supergroup"):
+        if cq.message.chat.type in ("group",):  # 'group' covers both group/supergroup in v2
             if not is_user_admin(client, chat_id, caller_id):
                 await cq.answer("Only group admins can perform this action.", show_alert=True)
                 return
@@ -235,10 +241,10 @@ async def chatbot_toggle_cb(client, cq: CallbackQuery):
             pass
 
 
+# show settings in private (owner/user)
 @app.on_message(filters.command("chatbot") & filters.private)
 async def chatbot_cmd_private(client, message: Message):
     """If used in private chat, show status and allow toggle (owner or user)."""
-    # In private, allow toggle by the user (they own the chat).
     chat_id = message.chat.id
     status_doc = status_coll.find_one({"chat_id": chat_id})
     is_enabled = not status_doc or status_doc.get("status") == "enabled"
@@ -251,23 +257,13 @@ async def chatbot_cmd_private(client, message: Message):
     await message.reply_text(text, reply_markup=chatbot_keyboard(is_enabled))
 
 
-@app.on_message(filters.command("chatbot") & filters.user())  # keep fallback safe
-async def chatbot_cmd_fallback(client, message: Message):
-    # No-op fallback to avoid unhandled /chatbot in other contexts
-    return
-
-
-# Admin-only: clear learned replies for this chat
-@app.on_message(filters.command("chatbot") & filters.regex(r"^/chatbot\s+reset$", flags=0) & (filters.group | filters.supergroup))
+# Admin-only: clear learned replies for this chat (global clear)
+@app.on_message(filters.command("chatbot") & filters.regex(r"^/chatbot\s+reset$", flags=0) & filters.group)
 async def chatbot_reset_group(client, message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     if not is_user_admin(client, chat_id, user_id):
         return await message.reply_text("❌ Only group admins can reset chatbot data.")
-    # remove entries where word originates from this chat? The original mapping is global keyed by word
-    # We'll remove entries whose 'word' contains messages coming from this chat only if such metadata existed.
-    # For simplicity we'll clear entire chatai collection when admin requests reset for the whole bot in that chat.
-    # Alternatively implement per-chat namespace — for now, delete all to honor request.
     chatai_coll.delete_many({})
     replies_cache.clear()
     await message.reply_text("✅ All learned replies cleared (global).")
@@ -275,14 +271,13 @@ async def chatbot_reset_group(client, message: Message):
 
 @app.on_message(filters.command("chatbot") & filters.regex(r"^/chatbot\s+reset$", flags=0) & filters.private)
 async def chatbot_reset_private(client, message: Message):
-    # allow user to reset their private-chat learned data (global clear here)
     chatai_coll.delete_many({})
     replies_cache.clear()
     await message.reply_text("✅ All learned replies cleared (global).")
 
 
 # Admin-only: set per-chat language for translation of replies
-@app.on_message(filters.command("setlang") & (filters.group | filters.supergroup))
+@app.on_message(filters.command("setlang") & filters.group)
 async def setlang_group(client, message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -298,7 +293,6 @@ async def setlang_group(client, message: Message):
 
 @app.on_message(filters.command("setlang") & filters.private)
 async def setlang_private(client, message: Message):
-    # allow in private
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         return await message.reply_text("Usage: /setlang <language_code>")
@@ -365,16 +359,21 @@ async def chatbot_handler(client, message: Message):
             return
 
         # ignore commands
-        if message.text and any(message.text.startswith(p) for p in ["/", "!", ".", "?", "#", "@"]):
+        if getattr(message, "text", None) and any(message.text.startswith(p) for p in ["/", "!", ".", "?", "#", "@"]):
             return
 
         # Bot should reply if message is a reply to the bot OR freely respond to chat (adjustable)
         should_respond = False
-        if message.reply_to_message and getattr(message.reply_to_message, "from_user", None):
-            if message.reply_to_message.from_user.id == client.me.id:
+        if getattr(message, "reply_to_message", None) and getattr(message.reply_to_message, "from_user", None):
+            # if user's message is replying to bot
+            try:
+                bot_id = client.get_me().id
+            except Exception:
+                bot_id = None
+            if bot_id and message.reply_to_message.from_user.id == bot_id:
                 should_respond = True
         else:
-            # If you want only explicit replies, set should_respond = False here.
+            # Allow general chat responses; set False to only respond when explicitly replied to
             should_respond = True
 
         if should_respond:
@@ -427,8 +426,12 @@ async def chatbot_handler(client, message: Message):
                     pass
 
         # Learning: if user replied to bot's message, save mapping bot_message -> user's reply
-        if message.reply_to_message and getattr(message.reply_to_message, "from_user", None):
-            if message.reply_to_message.from_user.id == client.me.id:
+        if getattr(message, "reply_to_message", None) and getattr(message.reply_to_message, "from_user", None):
+            try:
+                bot_id = client.get_me().id
+            except Exception:
+                bot_id = None
+            if bot_id and message.reply_to_message.from_user.id == bot_id:
                 await save_reply(message.reply_to_message, message)
 
     except Exception as e:
