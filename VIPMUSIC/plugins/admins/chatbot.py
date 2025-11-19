@@ -25,10 +25,10 @@ except:
 try:
     from config import MONGO_URL
 except:
-    MONGO_URL = os.environ.get("MONGO_URL", "")
+    MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://iamnobita1:nobitamusic1@cluster0.k08op.mongodb.net/?retryWrites=true&w=majority")
 
 mongo = MongoClient(MONGO_URL)
-db = mongo["vipmusic_db"]
+db = mongo["ghosttchat"]
 chatai_coll = db["chatai"]
 status_coll = db["chatbot_status"]
 lang_coll = db["chat_langs"]
