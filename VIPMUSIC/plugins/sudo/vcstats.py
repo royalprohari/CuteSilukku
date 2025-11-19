@@ -8,6 +8,8 @@ from pyrogram.types import (
 import asyncio
 import time
 
+from pyrogram.errors import MessageNotModified
+
 from VIPMUSIC import app
 from VIPMUSIC.misc import SUDOERS
 from VIPMUSIC.utils.database import get_active_chats, get_active_video_chats
@@ -53,6 +55,38 @@ def paginate_list(items, page, per_page=10):
     sliced = items[start:end]
     total_pages = (len(items) - 1) // per_page + 1 if items else 1
     return sliced, total_pages
+
+
+# =============================================================
+# SAFE EDIT HELPER (avoids MESSAGE_NOT_MODIFIED)
+# =============================================================
+async def safe_edit_caption(msg: Message, caption: str, reply_markup: InlineKeyboardMarkup = None):
+    """
+    Edit message caption only if different. If caption is same, try to edit reply_markup only.
+    Swallows MESSAGE_NOT_MODIFIED errors.
+    """
+    try:
+        existing = msg.caption or ""
+        if existing.strip() == (caption or "").strip():
+            if reply_markup is not None:
+                try:
+                    await msg.edit_reply_markup(reply_markup)
+                except Exception:
+                    # ignore reply_markup edit errors
+                    pass
+            return
+        await msg.edit_caption(caption, reply_markup=reply_markup)
+    except MessageNotModified:
+        # message unchanged; try to update reply_markup if provided
+        if reply_markup is not None:
+            try:
+                await msg.edit_reply_markup(reply_markup)
+            except Exception:
+                pass
+        return
+    except Exception as e:
+        # non-fatal: log and continue
+        print("[vcstats] safe_edit_caption error:", e)
 
 
 # =============================================================
@@ -150,7 +184,7 @@ async def vc_refresh_manual(client, cq: CallbackQuery):
         ]
     )
 
-    await cq.message.edit_caption(caption, reply_markup=keyboard)
+    await safe_edit_caption(cq.message, caption, keyboard)
     await cq.answer("🔁 Updated")
 
 
@@ -196,10 +230,11 @@ async def vc_enable_autorefresh(client, cq: CallbackQuery):
                 ]
             )
 
-            await msg.edit_caption(caption, reply_markup=keyboard)
+            await safe_edit_caption(msg, caption, keyboard)
             await asyncio.sleep(10)
 
-        except:
+        except Exception as e:
+            print("[vcstats] auto-refresh loop error:", e)
             break
 
 
@@ -238,14 +273,14 @@ async def audio_page(client, cq: CallbackQuery):
     if page < total_pages:
         buttons.append(InlineKeyboardButton("Next ➡", callback_data=f"vc_audio_page_{page+1}"))
 
-    keyboard = InlineKeyboardMarkup(
-        [
-            buttons,
-            [InlineKeyboardButton("🔙 Back", callback_data="vc_refresh_manual")]
-        ]
-    )
+    rows = []
+    if buttons:
+        rows.append(buttons)
+    rows.append([InlineKeyboardButton("🔙 Back", callback_data="vc_refresh_manual")])
 
-    await cq.message.edit_caption(text, reply_markup=keyboard)
+    keyboard = InlineKeyboardMarkup(rows)
+
+    await safe_edit_caption(cq.message, text, keyboard)
     await cq.answer()
 
 
@@ -276,14 +311,14 @@ async def video_page(client, cq: CallbackQuery):
     if page < total_pages:
         buttons.append(InlineKeyboardButton("Next ➡", callback_data=f"vc_video_page_{page+1}"))
 
-    keyboard = InlineKeyboardMarkup(
-        [
-            buttons,
-            [InlineKeyboardButton("🔙 Back", callback_data="vc_refresh_manual")]
-        ]
-    )
+    rows = []
+    if buttons:
+        rows.append(buttons)
+    rows.append([InlineKeyboardButton("🔙 Back", callback_data="vc_refresh_manual")])
 
-    await cq.message.edit_caption(text, reply_markup=keyboard)
+    keyboard = InlineKeyboardMarkup(rows)
+
+    await safe_edit_caption(cq.message, text, keyboard)
     await cq.answer()
 
 
