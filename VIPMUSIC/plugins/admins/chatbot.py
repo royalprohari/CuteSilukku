@@ -1,16 +1,3 @@
-"""
-chatbot.py — Combined chatbot + toggle + admin tools plugin
-For HB-Cute / VIPMUSIC (Pyrogram v2 compatible)
-
-Fully fixed:
-- Removed filters.supergroup
-- Removed filters.edited (uses message.edit_date instead)
-- Admin-based enable/disable with inline buttons
-- Auto-learning replies
-- Spam protection
-- Set per-chat language
-"""
-
 import os
 import random
 from datetime import datetime, timedelta
