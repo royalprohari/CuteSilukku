@@ -62,17 +62,17 @@ async def today_(_, message):
         sorted_users_data = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
 
         if sorted_users_data:
-            response = "**📈 LEADERBOARD TODAY**\n"
+            response = "<blockquote>**📈 𝐋ᴇᴀᴅᴇʀ𝐁ᴏᴀʀᴅ 𝐓ᴏᴅᴀʏ**</blockquote>\n"
             for idx, (user_id, total_messages) in enumerate(sorted_users_data, start=1):
                 try:
                     user_name = (await app.get_users(user_id)).first_name
                 except:
                     user_name = "Unknown"
-                user_info = f"**{idx}**. {user_name} • {total_messages}\n"
+                user_info = f"<blockquote>**{idx}**. {user_name} • {total_messages}\n</blockquote>"
                 response += user_info
 
             button = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("OVERALL", callback_data="overall")]]
+                [[InlineKeyboardButton("𝐎ᴠᴇᴇᴀʟʟ", callback_data="overall")]]
             )
 
             await message.reply_photo(photo=pic, caption=response, reply_markup=button)
@@ -87,7 +87,7 @@ async def today_(_, message):
 async def ranking(_, message):
     top_members = collection.find().sort("total_messages", -1).limit(10)
 
-    response = "**📈 LEADERBOARD**\n"
+    response = "<blockquote>**📈 𝐋ᴇᴀᴅᴇʀ𝐁ᴏᴀʀᴅ**</blockquote>\n"
     for idx, member in enumerate(top_members, start=1):
         user_id = member["_id"]
         total_messages = member["total_messages"]
@@ -97,11 +97,11 @@ async def ranking(_, message):
         except:
             user_name = "Unknown"
 
-        user_info = f"**{idx}**. {user_name} • {total_messages}\n"
+        user_info = f"<blockquote>**{idx}**. {user_name} • {total_messages}\n</blockquote>"
         response += user_info
 
     button = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("TODAY", callback_data="today")]]
+        [[InlineKeyboardButton("𝐓ᴏᴅᴀʏ", callback_data="today")]]
     )
 
     await message.reply_photo(photo=pic, caption=response, reply_markup=button)
@@ -120,18 +120,18 @@ async def today_rank(_, query):
         sorted_users_data = sorted(users_data, key=lambda x: x[1], reverse=True)[:10]
 
         if sorted_users_data:
-            response = "**📈 LEADERBOARD TODAY**\n"
+            response = "<blockquote>**📈 𝐋ᴇᴀᴅᴇʀ𝐁ᴏᴀʀᴅ**</blockquote>\n"
             for idx, (user_id, total_messages) in enumerate(sorted_users_data, start=1):
                 try:
                     user_name = (await app.get_users(user_id)).first_name
                 except:
                     user_name = "Unknown"
 
-                user_info = f"**{idx}**. {user_name} • {total_messages}\n"
+                user_info = f"<blockquote>**{idx}**. {user_name} • {total_messages}\n</blockquote>"
                 response += user_info
 
             button = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("OVERALL", callback_data="overall")]]
+                [[InlineKeyboardButton("𝐎ᴠᴇʀᴀʟʟ", callback_data="overall")]]
             )
 
             await query.message.edit_text(response, reply_markup=button)
@@ -158,7 +158,7 @@ async def overall_rank(_, query):
         response += f"<blockquote>**{idx}**. {user_name} • {total_messages}\n</blockquote>"
 
     button = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("TODAY", callback_data="today")]]
+        [[InlineKeyboardButton("𝐓ᴏᴅᴀʏ", callback_data="today")]]
     )
 
     await query.message.edit_text(response, reply_markup=button)
