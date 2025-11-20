@@ -65,6 +65,7 @@ git+https://github.com/THE-VIP-BOY-OP/yt-dlp-youtube-oauth2
 pymongo #fed
 kurigram
 async_pymongo #federation
+deep_translator #chatbot
 
 # === BioLink additional requirements ===
 regex
