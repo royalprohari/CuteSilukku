@@ -15,7 +15,7 @@ user_data = {}
 
 today = {}
 
-#RANKING_PIC = "https://graph.org/file/ffdb1be822436121cf5fd.png"
+RANKING_PIC = "https://graph.org/file/ffdb1be822436121cf5fd.png"
 
 
 # ------------------- WATCHER ----------------------- #
