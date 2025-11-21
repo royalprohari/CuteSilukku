@@ -61,7 +61,8 @@ bing_image_downloader
 bs4
 cloudscraper
 flask==2.2.2   #keep_alive         # CUTE
-pymongo[srv]==3.12.3
+pymongo
+#pymongo[srv]==3.12.3
 kurigram
 git+https://github.com/AsmSafone/SafoneAPI
 SafoneAPI
