@@ -8,14 +8,14 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 AUTO_GCASTS = f"{AUTO_GCAST}" if AUTO_GCAST else False
 
-START_IMG_URLS = "https://telegra.ph/file/e5aaa494015bccbe1ec85.jpg"
+#START_IMG_URL = "https://telegra.ph/file/e5aaa494015bccbe1ec85.jpg"
 
 MESSAGES = f""
 
 BUTTONS = InlineKeyboardMarkup(
     [
         [
-            InlineKeyboardButton("💕‌𝞖𝘌𝘈𝘙𝘛𝂬♡𝂬‌𝞑𝘌𝘈𝘛𝆺𝅥🦋", url=f"{SUPPORT_CHAT}")
+            InlineKeyboardButton("💥 𝐆σ 𝐅ᴇᴧᴛᴜʀᴇ𝗌 🚀", url=f"{SUPPORT_CHAT}")
         ]
     ]
 )
@@ -39,7 +39,7 @@ async def send_message_to_chats():
             chat_id = chat_info.get('chat_id')
             if isinstance(chat_id, int):  # Check if chat_id is an integer
                 try:
-                    await app.send_photo(chat_id, photo=START_IMG_URLS, caption=caption, reply_markup=BUTTONS)
+                    await app.send_photo(chat_id, photo=START_IMG_URL, caption=caption, reply_markup=BUTTONS)
                     await asyncio.sleep(20)  # Sleep for 100 second between sending messages
                 except Exception as e:
                     pass  # Do nothing if an error occurs while sending message
