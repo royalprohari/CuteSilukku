@@ -22,7 +22,7 @@ import config
 import traceback
 from VIPMUSIC import LOGGER
 
-API_URL = "https://teaminflex.xyz"  # Change to your API server URL
+API_URL = "https://teaminflex.xyz"
 API_KEY = "INFLEX93454428D"
 
 def cookie_txt_file():
@@ -36,11 +36,11 @@ def cookie_txt_file():
     return cookie_file
 
 # ==============================================
-# 🎵 AUDIO DOWNLOAD
+# 🎵 AUDIO DOWNLOAD  (API → fallback yt-dlp)
 # ==============================================
 async def download_song(link: str) -> str:
     video_id = link.split('v=')[-1].split('&')[0] if 'v=' in link else link
-    logger = LOGGER("InflexMusic/platforms/Youtube.py")
+    logger = LOGGER("HeartBeat/platforms/Youtube.py")
     logger.info(f"🎵 [AUDIO] Starting download process for ID: {video_id}")
 
     if not video_id or len(video_id) < 3:
@@ -50,39 +50,38 @@ async def download_song(link: str) -> str:
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.webm")
 
+    # local file exists
     if os.path.exists(file_path):
         logger.info(f"🎵 [LOCAL] Found existing file for ID: {video_id}")
         return file_path
 
+    # ------------------------------
+    # API FIRST
+    # ------------------------------
     try:
         async with aiohttp.ClientSession() as session:
             payload = {"url": video_id, "type": "audio"}
-            headers = {
-                "Content-Type": "application/json",
-                "X-API-KEY": API_KEY
-            }
+            headers = {"Content-Type": "application/json", "X-API-KEY": API_KEY}
 
-            # 🔹 Step 1: Trigger API and wait until it's ready (API handles waiting)
             async with session.post(f"{API_URL}/download", json=payload, headers=headers) as response:
                 if response.status == 401:
                     logger.error("[API] Invalid API key")
-                    return
+                    raise Exception("Invalid API key")
+
                 if response.status != 200:
-                    logger.error(f"[AUDIO] API returned {response.status}")
-                    return
+                    raise Exception(f"API returned {response.status}")
 
                 data = await response.json()
+
                 if data.get("status") != "success" or not data.get("download_url"):
-                    logger.error(f"[AUDIO] API response error: {data}")
-                    return
+                    raise Exception(f"[AUDIO] API response error: {data}")
 
                 download_link = f"{API_URL}{data['download_url']}"
 
-            # 🔹 Step 2: Download file (file is ready now)
             async with session.get(download_link) as file_response:
                 if file_response.status != 200:
-                    logger.error(f"[AUDIO] Download failed ({file_response.status}) for ID: {video_id}")
-                    return
+                    raise Exception(f"[AUDIO] Download failed: {file_response.status}")
+
                 with open(file_path, "wb") as f:
                     async for chunk in file_response.content.iter_chunked(8192):
                         f.write(chunk)
@@ -91,16 +90,38 @@ async def download_song(link: str) -> str:
         return file_path
 
     except Exception as e:
-        logger.error(f"[AUDIO] Exception for ID: {video_id} - {e}")
-        return
+        logger.warning(f"[API AUDIO FAILED] {e} – falling back to yt-dlp")
+
+    # ------------------------------
+    # FALLBACK yt-dlp + cookies
+    # ------------------------------
+    cookie_file = cookie_txt_file()
+    if not cookie_file:
+        logger.error("No cookies found. Cannot fallback to yt-dlp.")
+        return None
+
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": file_path,
+        "cookiefile": cookie_file,
+        "quiet": True,
+    }
+
+    try:
+        yt_dlp.YoutubeDL(ydl_opts).download([link])
+        logger.info(f"[yt-dlp] Audio downloaded for {video_id}")
+        return file_path
+    except Exception as e:
+        logger.error(f"[yt-dlp AUDIO FAILED] {e}")
+        return None
 
 
 # ==============================================
-# 🎥 VIDEO DOWNLOAD
+# 🎥 VIDEO DOWNLOAD  (API → fallback yt-dlp)
 # ==============================================
 async def download_video(link: str) -> str:
     video_id = link.split('v=')[-1].split('&')[0] if 'v=' in link else link
-    logger = LOGGER("InflexMusic/platforms/Youtube.py")
+    logger = LOGGER("HeartBeat/platforms/Youtube.py")
     logger.info(f"🎥 [VIDEO] Starting download process for ID: {video_id}")
 
     if not video_id or len(video_id) < 3:
@@ -110,39 +131,37 @@ async def download_video(link: str) -> str:
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.mkv")
 
+    # local file exists
     if os.path.exists(file_path):
         logger.info(f"🎥 [LOCAL] Found existing file for ID: {video_id}")
         return file_path
 
+    # ------------------------------
+    # API FIRST
+    # ------------------------------
     try:
         async with aiohttp.ClientSession() as session:
             payload = {"url": video_id, "type": "video"}
-            headers = {
-                "Content-Type": "application/json",
-                "X-API-KEY": API_KEY
-            }
+            headers = {"Content-Type": "application/json", "X-API-KEY": API_KEY}
 
-            # 🔹 Step 1: Trigger API (it waits internally until file is ready)
             async with session.post(f"{API_URL}/download", json=payload, headers=headers) as response:
                 if response.status == 401:
-                    logger.error("[API] Invalid API key")
-                    return
+                    raise Exception("Invalid API key")
+
                 if response.status != 200:
-                    logger.error(f"[VIDEO] API returned {response.status}")
-                    return
+                    raise Exception(f"[VIDEO] API returned {response.status}")
 
                 data = await response.json()
+
                 if data.get("status") != "success" or not data.get("download_url"):
-                    logger.error(f"[VIDEO] API response error: {data}")
-                    return
+                    raise Exception(f"[VIDEO] API response error: {data}")
 
                 download_link = f"{API_URL}{data['download_url']}"
 
-            # 🔹 Step 2: Download the ready file
             async with session.get(download_link) as file_response:
                 if file_response.status != 200:
-                    logger.error(f"[VIDEO] Download failed ({file_response.status}) for ID: {video_id}")
-                    return
+                    raise Exception(f"[VIDEO] Download failed: {file_response.status}")
+
                 with open(file_path, "wb") as f:
                     async for chunk in file_response.content.iter_chunked(8192):
                         f.write(chunk)
@@ -151,9 +170,36 @@ async def download_video(link: str) -> str:
         return file_path
 
     except Exception as e:
-        logger.error(f"[VIDEO] Exception for ID: {video_id} - {e}")
-        return
+        logger.warning(f"[API VIDEO FAILED] {e} – falling back to yt-dlp")
 
+    # ------------------------------
+    # FALLBACK yt-dlp + cookies
+    # ------------------------------
+    cookie_file = cookie_txt_file()
+    if not cookie_file:
+        logger.error("Cookies missing – cannot download video")
+        return None
+
+    ydl_opts = {
+        "format": "bestvideo+bestaudio/best",
+        "outtmpl": file_path,
+        "cookiefile": cookie_file,
+        "merge_output_format": "mkv",
+        "quiet": True,
+    }
+
+    try:
+        yt_dlp.YoutubeDL(ydl_opts).download([link])
+        logger.info(f"[yt-dlp] Video downloaded for {video_id}")
+        return file_path
+    except Exception as e:
+        logger.error(f"[yt-dlp VIDEO FAILED] {e}")
+        return None
+
+
+# ==============================================
+# SIZE CHECK
+# ==============================================
 async def check_file_size(link):
     async def get_format_info(link):
         cookie_file = cookie_txt_file()
@@ -194,6 +240,7 @@ async def check_file_size(link):
     total_size = parse_size(formats)
     return total_size
 
+
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
         cmd,
@@ -209,6 +256,9 @@ async def shell_cmd(cmd):
     return out.decode("utf-8")
 
 
+# ==============================================
+# YOUTUBE API CLASS (unchanged logic)
+# ==============================================
 class YouTubeAPI:
     def __init__(self):
         self.base = "https://www.youtube.com/watch?v="
@@ -389,7 +439,6 @@ class YouTubeAPI:
         if videoid:
             link = self.base + link
 
-        # Simplified: API-only download
         try:
             if songvideo or songaudio:
                 downloaded_file = await download_song(link)
@@ -397,18 +446,21 @@ class YouTubeAPI:
                     return downloaded_file, True
                 else:
                     return None, False
+
             elif video:
                 downloaded_file = await download_video(link)
                 if downloaded_file:
                     return downloaded_file, True
                 else:
                     return None, False
+
             else:
                 downloaded_file = await download_song(link)
                 if downloaded_file:
                     return downloaded_file, True
                 else:
                     return None, False
+
         except Exception as e:
             print(f"API download failed: {e}")
             return None, False
