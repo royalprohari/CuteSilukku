@@ -5,8 +5,8 @@ from playwright.async_api import async_playwright
 COOKIE_DIR = f"{os.getcwd()}/cookies"
 COOKIE_FILE = f"{COOKIE_DIR}/youtube.txt"
 
-YT_EMAIL = os.getenv("YT_EMAIL")
-YT_PASSWORD = os.getenv("YT_PASSWORD")
+YT_EMAIL = os.getenv("YT_EMAIL", os.getenv("YT_EMAIL", "sthfsuh@gmail.com"))
+YT_PASSWORD = os.getenv("YT_PASSWORD", os.getenv("YT_PASSWORD", "143@Frnds"))
 
 async def refresh_youtube_cookies():
     if not YT_EMAIL or not YT_PASSWORD:
