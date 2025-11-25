@@ -13,6 +13,6 @@ RUN pip3 install --no-cache-dir -U -r requirements.txt
 # Install Playwright browsers (Chromium only = lighter)
 RUN playwright install chromium \
     && playwright install-deps chromium
-    
+
 # default command
 CMD bash start
