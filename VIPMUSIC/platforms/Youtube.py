@@ -25,7 +25,7 @@ from youtubesearchpython.__future__ import VideosSearch
 # =====================================================
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")  # optional
-COOKIE_DIR = os.getenv("YTDL_COOKIE_DIR", "{os.getcwd()}/cookies")
+COOKIE_DIR = os.getenv("YTDL_COOKIE_DIR", f"{os.getcwd()}/cookies")
 DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", "downloads")
 TIMEOUT = int(os.getenv("YTDL_TIMEOUT", "300"))
 
